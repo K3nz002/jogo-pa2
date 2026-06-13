@@ -159,10 +159,6 @@ export class MapaScene extends Phaser.Scene {
 
     investigarPista() {
         // Aqui seria o gatilho para pausar o mapa e abrir a tela de diálogo/ponto-e-clique
-        // Em um jogo real, você usaria arquivos .png na pasta assets
-        // this.load.image('cursor_padrao', 'assets/cursores/seta.png');
-        // this.load.image('cursor_interagir', 'assets/cursores/lupa.png');
-        
         alert("Você encontrou uma pista!");
     }
     
