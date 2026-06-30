@@ -1,0 +1,64 @@
+{
+  "pistas": {
+    "copo_whisky": {
+      "id": "copo_whisky",
+      "titulo": "Copo de Whisky",
+      "descricao": "Resíduo de bebida no copo. Análise laboratorial indicou presença de cianeto de potássio. O veneno foi misturado à bebida da vítima.",
+      "implica": "marco",
+      "diaDisponivel": 1
+    },
+    "carta_ameaca": {
+      "id": "carta_ameaca",
+      "titulo": "Carta de Ameaça",
+      "descricao": "Carta enviada a Carlos Vilanova: 'Pague o que me deve ou você vai se arrepender muito. — M.F.' As iniciais correspondem a Marco Ferreira.",
+      "implica": "marco",
+      "diaDisponivel": 1
+    },
+    "agenda_reuniao": {
+      "id": "agenda_reuniao",
+      "titulo": "Agenda de Carlos",
+      "descricao": "Reunião marcada: 'M. Ferreira — assunto URGENTE da sociedade — 19h30'. Data: dia do crime. Mesmo horário estimado da morte.",
+      "implica": "marco",
+      "diaDisponivel": 1
+    },
+    "extrato_bancario": {
+      "id": "extrato_bancario",
+      "titulo": "Extrato Bancário (Computador)",
+      "descricao": "Dados do computador de Carlos: Marco Ferreira devia R$ 2.300.000,00 à sociedade. Prazo vencido há 3 meses. Carlos estava prestes a acionar a justiça.",
+      "implica": "marco",
+      "diaDisponivel": 2
+    },
+    "frasco_veneno": {
+      "id": "frasco_veneno",
+      "titulo": "Frasco de Cianeto",
+      "descricao": "Frasco de cianeto de potássio encontrado semi-enterrado perto do bar externo do jardim. Impressões digitais ainda em análise.",
+      "implica": "marco",
+      "diaDisponivel": 2
+    },
+    "digital_marco": {
+      "id": "digital_marco",
+      "titulo": "Impressão Digital — Relatório",
+      "descricao": "Relatório forense: impressões digitais de Marco Ferreira identificadas no copo de whisky e na garrafa de uísque. Ele estava na cena do crime.",
+      "implica": "marco",
+      "diaDisponivel": 3
+    },
+    "nota_falsa": {
+      "id": "nota_falsa",
+      "titulo": "Nota de Suicídio Falsa",
+      "descricao": "Nota supostamente escrita por Carlos, mas digitada em máquina de escrever. Carlos era canhoto e sempre assinava à mão. Alguém tentou desviar as suspeitas para Elena.",
+      "implica": "marco",
+      "diaDisponivel": 3
+    }
+  },
+  "puzzles": {
+    "senha_computador": {
+      "id": "senha_computador",
+      "tipo": "senha",
+      "descricao": "O computador de Carlos está protegido por senha de 6 dígitos.",
+      "dica": "Um post-it na lateral do monitor diz:\n'Mês do nosso casamento (2 dígitos) + Ano de fundação da empresa (4 dígitos)'\n\nCasaram em MARÇO. Empresa fundada em 1998.",
+      "senha": "031998",
+      "recompensa": "extrato_bancario",
+      "mensagemSucesso": "EXTRATO BANCÁRIO ACESSADO\nMarco Ferreira devia R$ 2.300.000,00 à sociedade.\nPrazo vencido. Motivo claro para o crime."
+    }
+  }
+}
