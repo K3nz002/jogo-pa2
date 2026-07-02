@@ -2,8 +2,10 @@
  * DialogueScene — Cena overlay para diálogos com NPCs.
  * Lançada sobre a MapaScene via scene.launch(). A MapaScene é pausada
  * durante o diálogo e resumida ao encerrar.
+ * 
+ * PS: Esperando o roteiro para colocar os dialogos verdadeiros, os dialogos e pistas foram gerados por ia.
  *
- * Dados recebidos via init(data):
+ * Estrutura dos dados enviados via scene.launch(DialogueScene, data):
  *   - npcId   {string}   — identificador do NPC
  *   - npcNome {string}   — nome de exibição
  *   - falas   {string[]} — linhas de diálogo

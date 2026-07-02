@@ -13,9 +13,7 @@ export class DialogoManager {
         this._pistas = scene.cache.json.get('pistas');
     }
 
-    // ----------------------------------------------------------------
     //  Diálogos de NPC
-    // ----------------------------------------------------------------
 
     /**
      * Retorna o array de falas de um NPC para um determinado dia.
@@ -41,10 +39,8 @@ export class DialogoManager {
         return this._dialogos?.npcs?.[npcId]?.nome || npcId;
     }
 
-    // ----------------------------------------------------------------
     //  Pistas
-    // ----------------------------------------------------------------
-
+    
     /**
      * Retorna os dados completos de uma pista.
      * @param {string} pistaId

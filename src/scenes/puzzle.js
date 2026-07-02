@@ -2,7 +2,7 @@
  * PuzzleScene — Cena overlay de puzzle de senha (computador).
  * Lançada sobre a MapaScene (que é pausada).
  *
- * Dados recebidos via init(data):
+ * Estrutura dos dados enviados via scene.launch(PuzzleScene, data):
  *   - puzzleId    {string} — ID do puzzle
  *   - pistasDados {object} — dados do puzzle vindos do pistas.json
  */

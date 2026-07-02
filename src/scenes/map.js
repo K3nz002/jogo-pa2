@@ -21,19 +21,15 @@ export class MapaScene extends Phaser.Scene {
         super({ key: 'MapaScene' });
     }
 
-    // ----------------------------------------------------------------
+
     //  Lifecycle
-    // ----------------------------------------------------------------
+
     init() {
         this.velocidadePlayer = 260;
         this.alcanceInteracao = 150;
         this._interagindo = false;    // true enquanto sub-cena está ativa
         this._objetosInterativos = [];
         this._msgTimer = null;
-    }
-
-    preload() {
-        // Todos os assets são carregados na BootScene
     }
 
     create() {
@@ -76,14 +72,14 @@ export class MapaScene extends Phaser.Scene {
         this._processarMovimento();
     }
 
-    // ----------------------------------------------------------------
+
     //  Construção do mundo
-    // ----------------------------------------------------------------
+
     _criarFundo() {
         // Base escura
         this.add.rectangle(960, 540, 1920, 1080, 0x0a0f1a);
 
-        // --- Áreas visuais ---
+        // Áreas visuais
         this._area(170,  542, 340,  950, 0x111d36, 'DELEGACIA');
         this._area(530,  542, 380,  950, 0x0e1928, 'ENTRADA');
         this._area(910,  390, 380,  620, 0x0d1526, 'SALA DE ESTAR');
@@ -158,9 +154,9 @@ export class MapaScene extends Phaser.Scene {
 
     _criarNPCs() {
         const npcsDef = [
-            { id: 'ricardo', nome: 'Ricardo Santos',  cor: 0xfbbf24, x: 490, y: 480, icon: '🧑‍🍳' },
-            { id: 'elena',   nome: 'Elena Vilanova',  cor: 0xd946ef, x: 890, y: 340, icon: '👩' },
-            { id: 'marco',   nome: 'Marco Ferreira',  cor: 0xef4444, x: 1700, y: 370, icon: '🕴️' },
+            { id: 'ricardo', nome: 'Ricardo',  cor: 0xfbbf24, x: 490, y: 480, icon: '🧑‍🍳' },
+            { id: 'elena',   nome: 'Elena',  cor: 0xd946ef, x: 890, y: 340, icon: '👩' },
+            { id: 'marco',   nome: 'Marco',  cor: 0xef4444, x: 1700, y: 370, icon: '🕴️' },
         ];
 
         this._npcs = [];
@@ -211,7 +207,7 @@ export class MapaScene extends Phaser.Scene {
     _criarObjetosInterativos() {
         // Definição de todos os objetos clicáveis do mundo
         const objsDef = [
-            // ---- DIA 1 ----
+            // DIA 1
             {
                 id: 'copo_whisky', nome: 'Copo de Whisky', x: 840, y: 570,
                 w: 26, h: 26, cor: 0xfef3c7, diaMin: 1, tipo: 'pista',
@@ -230,7 +226,7 @@ export class MapaScene extends Phaser.Scene {
                 pistaId: 'agenda_reuniao',
                 msg: '🔍  AGENDA DE CARLOS VILANOVA\n\nReunião: "M. Ferreira — assunto URGENTE — 19h30"\nData: dia do crime. Mesmo horário estimado da morte.'
             },
-            // ---- DIA 2 (computador = puzzle) ----
+            // DIA 2 (computador = puzzle)
             {
                 id: 'computador_carlos', nome: 'Computador', x: 555, y: 560,
                 w: 62, h: 42, cor: 0x0e7490, diaMin: 2, tipo: 'puzzle',
@@ -243,7 +239,7 @@ export class MapaScene extends Phaser.Scene {
                 pistaId: 'frasco_veneno',
                 msg: '🔍  FRASCO DE CIANETO DE POTÁSSIO\n\nEncontrado semi-enterrado perto do bar externo do jardim.\nImpressões digitais a analisar.'
             },
-            // ---- DIA 3 ----
+            // DIA 3
             {
                 id: 'digital_marco', nome: 'Relatório Digital', x: 855, y: 490,
                 w: 36, h: 28, cor: 0x6ee7b7, diaMin: 3, tipo: 'pista',
@@ -302,9 +298,9 @@ export class MapaScene extends Phaser.Scene {
         });
     }
 
-    // ----------------------------------------------------------------
+
     //  HUD (fixo na câmera)
-    // ----------------------------------------------------------------
+
     _criarHUD() {
         const depth = 200;
 
@@ -315,7 +311,7 @@ export class MapaScene extends Phaser.Scene {
             .setScrollFactor(0).setDepth(depth);
 
         // Logo / título
-        this.add.text(22, 34, '◆  CASO VILANOVA', {
+        this.add.text(22, 34, '◆  AINDA À ESPERA', {
             fontSize: '18px', fontFamily: "'Courier New', monospace", color: '#6366f1', fontStyle: 'bold'
         }).setOrigin(0, 0.5).setScrollFactor(0).setDepth(depth);
 
@@ -361,9 +357,8 @@ export class MapaScene extends Phaser.Scene {
         }
     }
 
-    // ----------------------------------------------------------------
     //  Caixa de mensagem inline
-    // ----------------------------------------------------------------
+
     _criarCaixaMensagem() {
         this._msgBg = this.add.rectangle(960, 1020, 1800, 110, 0x050c18, 0)
             .setScrollFactor(0).setDepth(190)
@@ -386,9 +381,9 @@ export class MapaScene extends Phaser.Scene {
         });
     }
 
-    // ----------------------------------------------------------------
+
     //  Controles
-    // ----------------------------------------------------------------
+
     _configurarTeclado() {
         this._keys = this.input.keyboard.createCursorKeys();
         this._wasd = this.input.keyboard.addKeys({
@@ -417,9 +412,9 @@ export class MapaScene extends Phaser.Scene {
         });
     }
 
-    // ----------------------------------------------------------------
+
     //  Movimentação
-    // ----------------------------------------------------------------
+
     _processarMovimento() {
         const vel = this.velocidadePlayer;
         let vx = 0, vy = 0;
@@ -436,9 +431,9 @@ export class MapaScene extends Phaser.Scene {
         this._playerIcon.setPosition(this.player.x, this.player.y - 28);
     }
 
-    // ----------------------------------------------------------------
+
     //  Interações com NPC
-    // ----------------------------------------------------------------
+
     _interagirNPC(npcRect) {
         const npcId   = npcRect.getData('npcId');
         const npcNome = npcRect.getData('npcNome');
@@ -461,9 +456,9 @@ export class MapaScene extends Phaser.Scene {
         this.scene.pause('MapaScene');
     }
 
-    // ----------------------------------------------------------------
+
     //  Interações com objetos
-    // ----------------------------------------------------------------
+
     _interagirObjeto(rect, def) {
         const dist = Phaser.Math.Distance.Between(
             this.player.x, this.player.y, rect.x, rect.y
@@ -527,9 +522,9 @@ export class MapaScene extends Phaser.Scene {
         this.tweens.add({ targets: n, y: y - 95, alpha: 0, duration: 1600, onComplete: () => n.destroy() });
     }
 
-    // ----------------------------------------------------------------
+
     //  Inventário / Caderno
-    // ----------------------------------------------------------------
+
     _abrirInventario() {
         if (this._interagindo) return;
         this._interagindo = true;
@@ -544,9 +539,9 @@ export class MapaScene extends Phaser.Scene {
         this.scene.pause('MapaScene');
     }
 
-    // ----------------------------------------------------------------
+
     //  Callbacks de sub-cenas
-    // ----------------------------------------------------------------
+
     _aoTerminarDialogo(npcId) {
         this._interagindo = false;
         GameState.registrarInterrogatorio(npcId);
@@ -570,9 +565,8 @@ export class MapaScene extends Phaser.Scene {
         if (fimDia) this.time.delayedCall(5200, () => this._fimDoDia());
     }
 
-    // ----------------------------------------------------------------
     //  Início de dia / Fim de dia
-    // ----------------------------------------------------------------
+
     _iniciarDia() {
         // Atualizar visibilidade dos objetos
         this._objetosInterativos.forEach(({ rect, glow, lbl, def }) => {
@@ -595,7 +589,7 @@ export class MapaScene extends Phaser.Scene {
 
         // Mensagem de início do dia
         const msgs = {
-            1: 'DIA 1 — A investigação começa.\nExamine a Mansão Vilanova e interrogue os suspeitos.\nUse SETAS / WASD para mover. CLIQUE nos objetos e NPCs para interagir.',
+            1: 'DIA 1 — A investigação começa.\nExamine a mansão e interrogue os suspeitos.\nUse SETAS / WASD para mover. CLIQUE nos objetos e NPCs para interagir.',
             2: 'DIA 2 — Novas pistas disponíveis.\nHá novos objetos para examinar no jardim e na entrada.\nO computador de Carlos pode guardar segredos importantes.',
             3: 'DIA FINAL — Última chance.\nUse todas as pistas coletadas. Pressione J ou o botão no HUD\npara abrir o Dia do Julgamento quando estiver pronto.'
         };

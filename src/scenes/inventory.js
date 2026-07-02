@@ -31,7 +31,7 @@ export class InventoryScene extends Phaser.Scene {
 
         // Cabeçalho
         this.add.rectangle(px, py - panelH / 2 + 38, panelW, 76, 0x1e293b);
-        this.add.text(px, py - panelH / 2 + 25, '📓  CADERNO DO DETETIVE', {
+        this.add.text(px, py - panelH / 2 + 25, '📓  ANOTAÇÕES', {
             fontSize: '22px', fontFamily: "'Courier New', monospace", color: '#f8fafc', fontStyle: 'bold'
         }).setOrigin(0.5);
         this.add.text(px, py - panelH / 2 + 55, `${GameState.getDiaTexto()}  •  ${GameState.getHoraFormatada()}  •  ${GameState.getAcoesRestantes()} ações restantes`, {

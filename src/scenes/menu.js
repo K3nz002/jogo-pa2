@@ -40,7 +40,7 @@ export class MenuScene extends Phaser.Scene {
         });
 
         // Título
-        const titulo = this.add.text(width / 2, height / 2 - 200, 'CASO VILANOVA', {
+        const titulo = this.add.text(width / 2, height / 2 - 200, 'AINDA À ESPERA', {
             fontSize: '74px',
             fontFamily: "'Courier New', monospace",
             color: '#f8fafc',
@@ -57,11 +57,10 @@ export class MenuScene extends Phaser.Scene {
             letterSpacing: 5
         }).setOrigin(0.5).setAlpha(0);
 
-        // --- Introdução da história ---
+        // Introdução da história
         const intro = this.add.text(width / 2, height / 2 - 20,
-            'O magnata Carlos Vilanova foi encontrado morto em sua mansão.\n' +
-            'Como detetive, você tem 3 dias para descobrir o assassino\n' +
-            'antes que ele fuja. Colete pistas, interrogue suspeitos e faça justiça.',
+            'Uma mulher desapareceu e o principal suspeito é o marido. Você tem 3 dias para\n' +
+            'descobrir o que aconteceu. Colete pistas, interrogue suspeitos e faça a justiça.',
             {
                 fontSize: '19px',
                 fontFamily: "'Courier New', monospace",
@@ -71,7 +70,7 @@ export class MenuScene extends Phaser.Scene {
             }
         ).setOrigin(0.5).setAlpha(0);
 
-        // --- Botão Jogar ---
+        // Botão Jogar
         const btnBg = this.add.rectangle(width / 2, height / 2 + 160, 320, 65, 0x6366f1)
             .setInteractive({ useHandCursor: true })
             .setAlpha(0);
@@ -82,7 +81,7 @@ export class MenuScene extends Phaser.Scene {
             fontStyle: 'bold'
         }).setOrigin(0.5).setAlpha(0);
 
-        // --- Controles ---
+        // Controles
         const controles = this.add.text(width / 2, height / 2 + 255,
             'SETAS / WASD: Mover   •   CLIQUE: Interagir   •   I: Inventário   •   N: Caderno',
             {
@@ -92,7 +91,7 @@ export class MenuScene extends Phaser.Scene {
             }
         ).setOrigin(0.5);
 
-        // --- Animações de entrada ---
+        // Animações de entrada
         this.tweens.add({ targets: titulo, alpha: 1, duration: 900, ease: 'Power2' });
         this.tweens.add({ targets: subtitulo, alpha: 1, duration: 900, delay: 200, ease: 'Power2' });
         this.tweens.add({ targets: intro, alpha: 1, duration: 800, delay: 700, ease: 'Power2' });

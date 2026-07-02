@@ -16,9 +16,6 @@ export class JulgamentoScene extends Phaser.Scene {
         this.cameras.main.fadeIn(700);
     }
 
-    // ----------------------------------------------------------------
-    //  Tela de Acusação
-    // ----------------------------------------------------------------
     _criarTelaAcusacao(width, height) {
         const pistasData = this.cache.json.get('pistas');
 
@@ -32,7 +29,7 @@ export class JulgamentoScene extends Phaser.Scene {
             fontSize: '44px', fontFamily: "'Courier New', monospace",
             color: '#f8fafc', fontStyle: 'bold', letterSpacing: 6
         }).setOrigin(0.5);
-        this.add.text(width / 2, 95, 'Com base nas pistas coletadas, quem você acusa pelo assassinato de Carlos Vilanova?', {
+        this.add.text(width / 2, 95, 'Com base nas pistas coletadas, quem você acusa pelo desaparecimento de Ana?', {
             fontSize: '16px', fontFamily: "'Courier New', monospace", color: '#64748b'
         }).setOrigin(0.5);
 
@@ -46,7 +43,7 @@ export class JulgamentoScene extends Phaser.Scene {
         const btnI = this.add.rectangle(width / 2, height - 55, 460, 50, 0x1e293b)
             .setInteractive({ useHandCursor: true });
         btnI.setStrokeStyle(1, 0x475569);
-        this.add.text(width / 2, height - 55, '📁  NÃO TENHO CERTEZA — Arquivar o caso', {
+        this.add.text(width / 2, height - 55, '📁  Arquivar o caso', {
             fontSize: '16px', fontFamily: "'Courier New', monospace", color: '#475569'
         }).setOrigin(0.5);
         btnI.on('pointerover', () => btnI.setFillStyle(0x334155));
@@ -91,15 +88,15 @@ export class JulgamentoScene extends Phaser.Scene {
     }
 
     _criarPainelSuspeitos(width, height) {
-        this.add.text(width - 660, 160, '👤  ESCOLHA O ACUSADO:', {
+        this.add.text(width - 660, 160, '👤  ESCOLHA O SUSPEITO:', {
             fontSize: '17px', fontFamily: "'Courier New', monospace",
             color: '#6366f1', fontStyle: 'bold'
         }).setOrigin(0);
 
         const suspeitos = [
-            { id: 'marco',   nome: 'Marco Ferreira',  papel: 'Sócio de Negócios', cor: 0xef4444, x: 1120 },
-            { id: 'elena',   nome: 'Elena Vilanova',  papel: 'Esposa da Vítima',  cor: 0xc026d3, x: 1380 },
-            { id: 'ricardo', nome: 'Ricardo Santos',  papel: 'Mordomo da Família', cor: 0xfbbf24, x: 1640 },
+            { id: 'marco',   nome: 'Marco',  papel: 'Chefe da Empresa', cor: 0xef4444, x: 1120 },
+            { id: 'elena',   nome: 'Elena',  papel: 'Mãe da Vítima',  cor: 0xc026d3, x: 1380 },
+            { id: 'ricardo', nome: 'Ricardo',  papel: 'Pai da Vítima', cor: 0xfbbf24, x: 1640 },
         ];
 
         suspeitos.forEach(sus => {
@@ -153,9 +150,8 @@ export class JulgamentoScene extends Phaser.Scene {
         });
     }
 
-    // ----------------------------------------------------------------
     //  Lógica de Acusação
-    // ----------------------------------------------------------------
+
     _acusar(suspeito) {
         const resultado = GameState.calcularFinal(suspeito.id);
         this._mostrarFinal(resultado, suspeito);
@@ -170,9 +166,8 @@ export class JulgamentoScene extends Phaser.Scene {
         });
     }
 
-    // ----------------------------------------------------------------
     //  Telas de Final
-    // ----------------------------------------------------------------
+
     _criarTelaFinal(resultado, suspeito) {
         const { width, height } = this.scale;
 
@@ -184,7 +179,7 @@ export class JulgamentoScene extends Phaser.Scene {
                 texto:
                     'Parabéns, Detetive.\n\n' +
                     'Com as provas reunidas, Marco Ferreira foi indiciado pelo\n' +
-                    'assassinato de Carlos Vilanova.\n\n' +
+                    'desaparecimento de Ana.\n\n' +
                     'O motivo: uma dívida impagável de R$ 2,3 milhões.\n' +
                     'O veneno foi misturado ao whisky durante a "reunião de negócios".\n\n' +
                     'A família Vilanova finalmente terá justiça.'
@@ -194,9 +189,9 @@ export class JulgamentoScene extends Phaser.Scene {
                 emoji: '⚠️', titulo: '⚠  SUSPEITO CERTO, PROVAS INSUFICIENTES',
                 subtitulo: 'Você apontou para o culpado — mas sem evidências suficientes.',
                 texto:
-                    'Você desconfiou de Marco Ferreira — e estava certo.\n' +
+                    'Você desconfiou de Marco — e estava certo.\n' +
                     'Mas sem provas sólidas, o promotor não conseguiu uma condenação.\n\n' +
-                    'Marco Ferreira foi solto por falta de evidências.\n' +
+                    'Marco foi solto por falta de evidências.\n' +
                     'O caso permanece aberto, e o criminoso continua livre.\n\n' +
                     'Colete mais pistas antes de acusar alguém na próxima vez.'
             },
@@ -208,7 +203,7 @@ export class JulgamentoScene extends Phaser.Scene {
                     `Você acusou ${suspeito?.nome || 'um inocente'}, mas errou o alvo.\n\n` +
                     'Enquanto o processo judicial se arrastava, Marco Ferreira\n' +
                     'destruiu as evidências restantes e fugiu do país.\n\n' +
-                    'O verdadeiro assassino de Carlos Vilanova nunca foi punido.\n' +
+                    'O verdadeiro culpado do desaparecimento de Ana nunca foi punido.\n' +
                     'Um inocente pagou o preço.'
             },
             inconclusivo: {
@@ -217,8 +212,8 @@ export class JulgamentoScene extends Phaser.Scene {
                 subtitulo: 'A investigação não chegou a uma conclusão.',
                 texto:
                     'Você não conseguiu reunir provas suficientes para acusar ninguém.\n\n' +
-                    'O caso do assassinato de Carlos Vilanova foi arquivado.\n' +
-                    'Marco Ferreira, o verdadeiro culpado, continuou sua vida normalmente.\n\n' +
+                    'O caso de desaparecimento de Ana foi arquivado.\n' +
+                    'Marco, o verdadeiro culpado, continuou sua vida normalmente.\n\n' +
                     'A justiça nem sempre prevalece.'
             }
         };

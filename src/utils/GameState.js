@@ -16,9 +16,9 @@ export const GameState = {
 
     criminosoVerdadeiro: 'marco',
 
-    // ----------------------------------------------------------------
+
     //  Verificações
-    // ----------------------------------------------------------------
+
     temItem(id) {
         return this.inventario.includes(id);
     },
@@ -32,9 +32,9 @@ export const GameState = {
         return this.interrogados[npcId].includes(this.diaAtual);
     },
 
-    // ----------------------------------------------------------------
+
     //  Mutações
-    // ----------------------------------------------------------------
+
     adicionarItem(id) {
         if (!this.temItem(id)) {
             this.inventario.push(id);
@@ -74,9 +74,8 @@ export const GameState = {
         this.acoesHoje = 0;
     },
 
-    // ----------------------------------------------------------------
     //  Formatação
-    // ----------------------------------------------------------------
+
     getHoraFormatada() {
         return `${String(this.horaAtual).padStart(2, '0')}:00`;
     },
@@ -89,9 +88,7 @@ export const GameState = {
         return Math.max(0, this.maxAcoesPorDia - this.acoesHoje);
     },
 
-    // ----------------------------------------------------------------
     //  Julgamento Final
-    // ----------------------------------------------------------------
     /**
      * Calcula o resultado do julgamento com base no acusado e nas provas.
      * @param {string|null} acusadoId - ID do suspeito acusado, ou null para inconclusivo.
@@ -109,9 +106,8 @@ export const GameState = {
         return 'errado';
     },
 
-    // ----------------------------------------------------------------
     //  Reset
-    // ----------------------------------------------------------------
+    
     reset() {
         this.diaAtual = 1;
         this.horaAtual = 8;

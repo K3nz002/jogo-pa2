@@ -1,7 +1,7 @@
 {
   "npcs": {
     "elena": {
-      "nome": "Elena Vilanova",
+      "nome": "Elena",
       "falas": {
         "1": [
           "Elena: Detetive, que alívio que veio pessoalmente...",
@@ -24,7 +24,7 @@
       }
     },
     "marco": {
-      "nome": "Marco Ferreira",
+      "nome": "Marco",
       "falas": {
         "1": [
           "Marco: Carlos? Uma tragédia, sem dúvida. Éramos sócios e amigos há mais de vinte anos.",
@@ -47,7 +47,7 @@
       }
     },
     "ricardo": {
-      "nome": "Ricardo Santos",
+      "nome": "Ricardo",
       "falas": {
         "1": [
           "Ricardo: Trinta anos servindo esta família... nunca vi o Sr. Carlos tão perturbado quanto nas últimas semanas.",

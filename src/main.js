@@ -1,5 +1,5 @@
 /**
- * main.js — Ponto de entrada do jogo Caso Vilanova.
+ * main.js — Ponto de entrada do jogo.
  * Registra todas as cenas e inicializa a instância do Phaser.
  */
 import { BootScene }      from './scenes/boot.js';
@@ -14,16 +14,15 @@ const config = {
     type: Phaser.AUTO,
     width: 1920,
     height: 1080,
-    pixelArt: false,          // desligado para texto nítido
+    pixelArt: false,
     backgroundColor: '#070c14',
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 0 }, // Jogo top-down, sem gravidade
-            debug: false        // Mude para true para ver caixas de colisão
+            gravity: { y: 0 },
+            debug: false
         }
     },
-    // Ordem: Boot → Menu → Mapa (+ overlays)
     scene: [
         BootScene,
         MenuScene,
