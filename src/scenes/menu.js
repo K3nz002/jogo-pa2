@@ -83,7 +83,7 @@ export class MenuScene extends Phaser.Scene {
 
         // Controles
         const controles = this.add.text(width / 2, height / 2 + 255,
-            'SETAS / WASD: Mover   •   CLIQUE: Interagir   •   I: Inventário   •   N: Caderno',
+            'SETAS / WASD: Mover   •   CLIQUE COM O MOUSE OU BARRA DE ESPAÇO: Interagir   •   I: Inventário   •   N: Caderno',
             {
                 fontSize: '14px',
                 fontFamily: "'Courier New', monospace",
