@@ -79,4 +79,16 @@ export class DialogoManager {
             .map(id => this.getPistaDados(id))
             .filter(Boolean);
     }
+
+    /**
+     * Retorna o ponto-chave de um interrogatório (resumo importante).
+     * @param {string} npcId
+     * @param {number} dia
+     * @returns {string|null}
+     */
+    getPontoChave(npcId, dia) {
+        const diaStr = String(dia);
+        const npc = this._dialogos?.npcs?.[npcId];
+        return npc?.pontosChave?.[diaStr] || null;
+    }
 }

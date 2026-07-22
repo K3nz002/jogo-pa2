@@ -57,6 +57,11 @@ export class MapaScene extends Phaser.Scene {
         this.events.on('dialogoEncerrado', this._aoTerminarDialogo, this);
         this.events.on('puzzleResolvido',   this._aoPuzzleResolvido,  this);
 
+        // Ao retomar a cena (ex: fechar inventário/caderno), desbloquear interação
+        this.events.on('resume', () => {
+            this._interagindo = false;
+        });
+
         // Câmera segue o player
         this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
         this.cameras.main.setDeadzone(200, 100);
@@ -321,11 +326,11 @@ export class MapaScene extends Phaser.Scene {
         this._hudAcoes = this._hudTxt(850, 34, '', depth, '#fbbf24');
 
         // Botões fixos
-        this._criarBotaoHUD(1620, 34, '[ I ]  INVENTÁRIO', depth, () => this._abrirInventario());
-        this._criarBotaoHUD(1820, 34, '[ N ]  CADERNO',   depth, () => this._abrirCaderno());
+        this._criarBotaoHUD(1820, 34, '[ I ] 🎒 INVENTÁRIO', depth, () => this._abrirInventario());
+        this._criarBotaoHUD(1620, 34, '[ N ] ✏️ CADERNO',   depth, () => this._abrirCaderno());
 
         // Botão julgamento (aparece no dia 3)
-        this._btnJulgamentoHUD = this._criarBotaoHUD(1430, 34, '[ J ]  JULGAMENTO ⚖️', depth, () => this._irJulgamento(), '#ef4444');
+        this._btnJulgamentoHUD = this._criarBotaoHUD(1430, 34, '[ J ] ⚖️ JULGAMENTO', depth, () => this._irJulgamento(), '#ef4444');
         this._btnJulgamentoHUD.setVisible(GameState.diaAtual >= GameState.maxDias);
 
         this._atualizarHUD();
@@ -351,7 +356,7 @@ export class MapaScene extends Phaser.Scene {
         this._hudDia.setText(`DIA ${GameState.diaAtual} / ${GameState.maxDias}`);
         this._hudHora.setText(`⏰  ${GameState.getHoraFormatada()}`);
         const ac = GameState.getAcoesRestantes();
-        this._hudAcoes.setText(`⚡  ${ac} AÇÃO${ac !== 1 ? 'ÕES' : ''} RESTANTE${ac !== 1 ? 'S' : ''}`);
+        this._hudAcoes.setText(`⚡  ${ac} ${ac !== 1 ? 'AÇÕES' : 'AÇÃO'} RESTANTE${ac !== 1 ? 'S' : ''}`);
         if (this._btnJulgamentoHUD) {
             this._btnJulgamentoHUD.setVisible(GameState.diaAtual >= GameState.maxDias);
         }
@@ -394,6 +399,11 @@ export class MapaScene extends Phaser.Scene {
         });
 
         this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE).on('down', () => {
+            if (this._interagindo) return;
+            if (!GameState.podeAgir()) {
+                this.mostrarMensagem('Você não pode mais agir hoje. Aguarde o fim do dia.', 2500);
+                return;
+            }
               // Procura o NPC mais próximo dentro do alcance
             let alvoNPC = null;
             let menorDistNPC = this.alcanceInteracao;
@@ -432,8 +442,15 @@ export class MapaScene extends Phaser.Scene {
             const tipo = obj.getData('tipo');
             const objDef = obj.getData('objDef');
 
-            if (tipo === 'npc')   this._interagirNPC(obj);
-            else if (objDef)      this._interagirObjeto(obj, objDef);
+            if (tipo === 'npc')   
+                this._interagirNPC(obj);
+            else if (objDef) {
+                if (!GameState.podeAgir()) {
+                    this.mostrarMensagem('Você não pode mais agir hoje. Aguarde o fim do dia.', 2500);
+                    return;
+                }
+                this._interagirObjeto(obj, objDef);
+            }
         });
     }
 
@@ -470,6 +487,10 @@ export class MapaScene extends Phaser.Scene {
             this.mostrarMensagem(`Muito longe. Aproxime-se de ${npcNome} para conversar.`, 2500);
             return;
         }
+        if (!GameState.podeAgir()) {
+            this.mostrarMensagem('Você não pode mais agir hoje. Aguarde o fim do dia.', 2500);
+            return;
+        }
         if (GameState.jaDinterrogadoHoje(npcId)) {
             this.mostrarMensagem(`${npcNome} já foi interrogado hoje. Volte amanhã.`, 2500);
             return;
@@ -496,6 +517,10 @@ export class MapaScene extends Phaser.Scene {
         }
         if (def.diaMin > GameState.diaAtual) {
             this.mostrarMensagem('Nada de interessante aqui por enquanto.', 2000);
+            return;
+        }
+        if (!GameState.podeAgir()) {
+            this.mostrarMensagem('Você não pode mais agir hoje. Aguarde o fim do dia.', 2500);
             return;
         }
 
@@ -571,6 +596,13 @@ export class MapaScene extends Phaser.Scene {
         this._interagindo = false;
         GameState.registrarInterrogatorio(npcId);
         const nomeNPC = this.dialogoMgr.getNomeNPC(npcId);
+
+        // Registrar ponto-chave do interrogatório no caderno
+        const pontoChave = this.dialogoMgr.getPontoChave(npcId, GameState.diaAtual);
+        if (pontoChave) {
+            GameState.registrarAnotacaoInterrogatorio(npcId, nomeNPC, GameState.diaAtual, pontoChave);
+        }
+
         const fimDia = GameState.gastarAcao();
         this._atualizarHUD();
         this.mostrarMensagem(`Interrogatório de ${nomeNPC} concluído.\nInformações anotadas no caderno.`, 3500);
