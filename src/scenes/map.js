@@ -392,6 +392,31 @@ export class MapaScene extends Phaser.Scene {
             left:  Phaser.Input.Keyboard.KeyCodes.A,
             right: Phaser.Input.Keyboard.KeyCodes.D,
         });
+
+        this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE).on('down', () => {
+              // Procura o NPC mais próximo dentro do alcance
+            let alvoNPC = null;
+            let menorDistNPC = this.alcanceInteracao;
+            for (const { rect } of this._npcs) {
+                const d = Phaser.Math.Distance.Between(this.player.x, this.player.y, rect.x, rect.y);
+                if (d <= menorDistNPC) { menorDistNPC = d; alvoNPC = rect; }
+            }
+            // Procura o objeto interativo mais próximo dentro do alcance
+            let alvoObj = null;
+            let alvoObjDef = null;
+            let menorDistObj = this.alcanceInteracao * 1.6;
+            for (const { rect, def } of this._objetosInterativos) {
+                if (!rect.visible) continue;
+                const d = Phaser.Math.Distance.Between(this.player.x, this.player.y, rect.x, rect.y);
+                if (d <= menorDistObj) { menorDistObj = d; alvoObj = rect; alvoObjDef = def; }
+            }
+            
+            if (alvoNPC) {
+                this._interagirNPC(alvoNPC);
+            } else if (alvoObj && alvoObjDef) {
+                this._interagirObjeto(alvoObj, alvoObjDef);
+            }
+        });
         this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I).on('down', () => this._abrirInventario());
         this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.N).on('down', () => this._abrirCaderno());
         this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.J).on('down', () => {
