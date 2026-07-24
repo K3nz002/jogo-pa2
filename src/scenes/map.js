@@ -161,23 +161,43 @@ export class MapaScene extends Phaser.Scene {
         const npcsDef = [
             { id: 'ricardo', nome: 'Ricardo',  cor: 0xfbbf24, x: 490, y: 480, icon: '🧑‍🍳' },
             { id: 'elena',   nome: 'Elena',  cor: 0xd946ef, x: 890, y: 340, icon: '👩' },
-            { id: 'marco',   nome: 'Marco',  cor: 0xef4444, x: 1700, y: 370, icon: '🕴️' },
+            { id: 'marco',   nome: 'Marco',  cor: 0xef4444, x: 1700, y: 370, icon: null, sprite: 'npc-2' },
         ];
 
         this._npcs = [];
 
         npcsDef.forEach(def => {
-            // Corpo do NPC
-            const npc = this.add.rectangle(def.x, def.y, 30, 46, def.cor, 0.9).setDepth(9);
-            this.physics.add.existing(npc, true);
+            let npc;
+
+            if (def.sprite) {
+                // Usar sprite em vez de retângulo
+                npc = this.add.image(def.x, def.y, def.sprite).setDepth(9);
+                // Escala para manter proporção visual
+                const targetH = 120;
+                const scale = targetH / npc.height;
+                npc.setScale(scale);
+                this.physics.add.existing(npc, true);
+                npc.body.setSize(30, 46);
+                npc.body.setOffset(
+                    (npc.width - 30 / scale) / 2,
+                    (npc.height - 46 / scale) / 2
+                );
+            } else {
+                // Retângulo colorido (padrão)
+                npc = this.add.rectangle(def.x, def.y, 30, 46, def.cor, 0.9).setDepth(9);
+                this.physics.add.existing(npc, true);
+            }
+
             npc.setInteractive({ useHandCursor: true });
             npc.setData('tipo', 'npc');
             npc.setData('npcId', def.id);
             npc.setData('npcNome', def.nome);
 
-            // Ícone
-            this.add.text(def.x, def.y - 26, def.icon, { fontSize: '20px' })
-                .setOrigin(0.5).setDepth(10);
+            // Ícone (apenas se definido — sprites não precisam de emoji)
+            if (def.icon) {
+                this.add.text(def.x, def.y - 26, def.icon, { fontSize: '20px' })
+                    .setOrigin(0.5).setDepth(10);
+            }
 
             // Nome acima
             const nomeTag = this.add.text(def.x, def.y - 50, def.nome, {
@@ -192,20 +212,21 @@ export class MapaScene extends Phaser.Scene {
             this.tweens.add({ targets: q, y: q.y - 6, yoyo: true, repeat: -1, duration: 900, ease: 'Sine.easeInOut' });
 
             // Efeitos de hover
+            const baseScaleY = npc.scaleY; // guardar escala original
             npc.on('pointerover', () => {
-                this.tweens.add({ targets: npc, scaleY: 1.08, duration: 110 });
+                this.tweens.add({ targets: npc, scaleY: baseScaleY * 1.08, duration: 110 });
                 nomeTag.setAlpha(1);
                 this.input.setDefaultCursor('pointer');
             });
             npc.on('pointerout', () => {
-                this.tweens.add({ targets: npc, scaleY: 1, duration: 110 });
+                this.tweens.add({ targets: npc, scaleY: baseScaleY, duration: 110 });
                 nomeTag.setAlpha(0.75);
                 this.input.setDefaultCursor('default');
             });
 
             // Colisão com player
             this.physics.add.collider(this.player, npc);
-            this._npcs.push({ rect: npc, def });
+            this._npcs.push({ rect: npc, def, q });
         });
     }
 
@@ -597,6 +618,12 @@ export class MapaScene extends Phaser.Scene {
         GameState.registrarInterrogatorio(npcId);
         const nomeNPC = this.dialogoMgr.getNomeNPC(npcId);
 
+        // Esconder o ponto de interrogação do NPC
+        const npcEntry = this._npcs.find(n => n.def.id === npcId);
+        if (npcEntry && npcEntry.q) {
+            npcEntry.q.setVisible(false);
+        }
+
         // Registrar ponto-chave do interrogatório no caderno
         const pontoChave = this.dialogoMgr.getPontoChave(npcId, GameState.diaAtual);
         if (pontoChave) {
@@ -640,6 +667,14 @@ export class MapaScene extends Phaser.Scene {
         if (this._btnJulgamentoHUD) {
             this._btnJulgamentoHUD.setVisible(GameState.diaAtual >= GameState.maxDias);
         }
+
+        // Atualizar pontos de interrogação dos NPCs
+        this._npcs.forEach(n => {
+            if (n.q) {
+                const jaInterrogado = GameState.jaDinterrogadoHoje(n.def.id);
+                n.q.setVisible(!jaInterrogado);
+            }
+        });
 
         // Fade in
         this.cameras.main.fadeIn(900, 0, 0, 0);

@@ -2,12 +2,14 @@
  * main.js — Ponto de entrada do jogo.
  * Registra todas as cenas e inicializa a instância do Phaser.
  */
-import { BootScene }      from './scenes/boot.js';
-import { MenuScene }      from './scenes/menu.js';
-import { MapaScene }      from './scenes/map.js';
-import { DialogueScene }  from './scenes/dialogue.js';
-import { InventoryScene } from './scenes/inventory.js';
-import { PuzzleScene }    from './scenes/puzzle.js';
+import { BootScene }       from './scenes/boot.js';
+import { MenuScene }       from './scenes/menu.js';
+import { TutorialScene }   from './scenes/tutorial.js';
+import { Cena2Scene }  from './scenes/cena2.js';
+import { MapaScene }       from './scenes/map.js';
+import { DialogueScene }   from './scenes/dialogue.js';
+import { InventoryScene }  from './scenes/inventory.js';
+import { PuzzleScene }     from './scenes/puzzle.js';
 import { JulgamentoScene } from './scenes/julgamento.js';
 
 const config = {
@@ -26,6 +28,8 @@ const config = {
     scene: [
         BootScene,
         MenuScene,
+        TutorialScene,
+        Cena2Scene,
         MapaScene,
         DialogueScene,
         InventoryScene,

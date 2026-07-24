@@ -251,7 +251,7 @@ export class JulgamentoScene extends Phaser.Scene {
                 emoji: '🏆', titulo: '✓  CASO RESOLVIDO',
                 subtitulo: 'Marco Ferreira foi preso e indiciado!',
                 texto:
-                    '\n\nParabéns, Detetive.\n\n' +
+                    '\n\n\nParabéns, Detetive.\n\n' +
                     'Com as provas reunidas, Marco Ferreira foi indiciado pelo\n' +
                     'desaparecimento de Ana.\n\n' +
                     'O motivo: uma dívida impagável de R$ 2,3 milhões.\n' +
@@ -274,7 +274,7 @@ export class JulgamentoScene extends Phaser.Scene {
                 emoji: '❌', titulo: '✗  ACUSAÇÃO ERRADA',
                 subtitulo: `Um inocente foi acusado: ${suspeito?.nome || '?'}.`,
                 texto:
-                    `\n\nVocê acusou ${suspeito?.nome || 'um inocente'}, mas errou o alvo.\n\n` +
+                    `\n\n\nVocê acusou ${suspeito?.nome || 'um inocente'}, mas errou o alvo.\n\n` +
                     'Enquanto o processo judicial se arrastava, Marco Ferreira\n' +
                     'destruiu as evidências restantes e fugiu do país.\n\n' +
                     'O verdadeiro culpado do desaparecimento de Ana nunca foi punido.\n' +
@@ -285,7 +285,7 @@ export class JulgamentoScene extends Phaser.Scene {
                 emoji: '📁', titulo: '📁  CASO ARQUIVADO',
                 subtitulo: 'A investigação não chegou a uma conclusão.',
                 texto:
-                    '\n\nVocê não conseguiu reunir provas suficientes para acusar ninguém.\n\n' +
+                    '\n\n\nVocê não conseguiu reunir provas suficientes para acusar ninguém.\n\n' +
                     'O caso de desaparecimento de Ana foi arquivado.\n' +
                     'Marco, o verdadeiro culpado, continuou sua vida normalmente.\n\n' +
                     'A justiça nem sempre prevalece.'
