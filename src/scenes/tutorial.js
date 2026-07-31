@@ -24,26 +24,25 @@ export class TutorialScene extends Phaser.Scene {
 
     preload() {
         // --------------------------------------------------------------------------
-        // 📥 1. CARREGAMENTO DOS ASSETS GLOBAIS
-        // ⚠️ Altere 'assets/policial.png' para o caminho real da sua imagem!
-        // ⚠️ Altere frameWidth e frameHeight para o tamanho exato dos quadros.
+        // 📥 CARREGAMENTO DO SPRITESHEET DO PROTAGONISTA (14x31 pixels por quadro)
+        // ⚠️ Certifique-se de que o arquivo 'Protagonista.png' está na pasta 'assets/'
         // --------------------------------------------------------------------------
-        this.load.spritesheet('policial_sheet', 'assets/policial.png', {
-            frameWidth: 32,
-            frameHeight: 48
+        this.load.spritesheet('policial_sheet', 'assets/Protagonista.png', {
+            frameWidth: 14,
+            frameHeight: 31
         });
     }
 
     create() {
         const { width, height } = this.scale;
 
-        // 🎬 Criar Animações Globais (ficam salvas no cache para o jogo todo)
+        // 🎬 Criar Animações Globais (4 Direções)
         this._criarAnimacoesGlobais();
 
         // Fundo da delegacia 
         this._criarDelegacia(width, height);
 
-        // Player (Agora com Sprite e Animação)
+        // Player com Sprite Animado
         this._criarPlayer(width, height);
 
         // Telefone 
@@ -68,7 +67,7 @@ export class TutorialScene extends Phaser.Scene {
     update() {
         if (this._fase === 'dialogo' || this._fase === 'missao') {
             this.player.body.setVelocity(0);
-            this.player.anims.play('policial_parado', true);
+            this.player.anims.stop();
             return;
         }
 
@@ -77,24 +76,40 @@ export class TutorialScene extends Phaser.Scene {
     }
 
     _criarAnimacoesGlobais() {
-        // Cria apenas se ainda não existirem no cache do Phaser
-        if (!this.anims.exists('policial_parado')) {
-            this.anims.create({
-                key: 'policial_parado',
-                frames: this.anims.generateFrameNumbers('policial_sheet', { start: 0, end: 0 }),
-                frameRate: 1,
-                repeat: -1
-            });
-        }
+        // Cria as animações apenas se não existirem no cache
+        if (this.anims.exists('andar_baixo')) return;
 
-        if (!this.anims.exists('policial_andar')) {
-            this.anims.create({
-                key: 'policial_andar',
-                frames: this.anims.generateFrameNumbers('policial_sheet', { start: 1, end: 4 }),
-                frameRate: 8,
-                repeat: -1
-            });
-        }
+        // ⬇️ Linha 1 (Frames 0, 1, 2, 3) - Andar para Baixo
+        this.anims.create({
+            key: 'andar_baixo',
+            frames: this.anims.generateFrameNumbers('policial_sheet', { start: 0, end: 3 }),
+            frameRate: 8,
+            repeat: -1
+        });
+
+        // ⬅️ Linha 2 (Frames 4, 5, 6, 7) - Andar para Esquerda
+        this.anims.create({
+            key: 'andar_esquerda',
+            frames: this.anims.generateFrameNumbers('policial_sheet', { start: 4, end: 7 }),
+            frameRate: 8,
+            repeat: -1
+        });
+
+        // ⬆️ Linha 3 (Frames 8, 9, 10, 11) - Andar para Cima
+        this.anims.create({
+            key: 'andar_cima',
+            frames: this.anims.generateFrameNumbers('policial_sheet', { start: 8, end: 11 }),
+            frameRate: 8,
+            repeat: -1
+        });
+
+        // ➡️ Linha 4 (Frames 12, 13, 14, 15) - Andar para Direita
+        this.anims.create({
+            key: 'andar_direita',
+            frames: this.anims.generateFrameNumbers('policial_sheet', { start: 12, end: 15 }),
+            frameRate: 8,
+            repeat: -1
+        });
     }
 
     _criarDelegacia(w, h) {
@@ -183,16 +198,18 @@ export class TutorialScene extends Phaser.Scene {
     }
 
     _criarPlayer(w, h) {
-        // 👮 CRIAÇÃO DO PLAYER COM SPRITE ANIMADO (Sem retângulos ou emojis soltos)
+        // 👮 CRIAÇÃO DO PLAYER USANDO SEU NOVO SPRITE
         this.player = this.physics.add.sprite(500, 640, 'policial_sheet');
         this.player.setDepth(10);
+        this.player.setScale(2); // Aumenta um pouco o sprite pixel art para destacar na tela
         this.player.body.setCollideWorldBounds(true);
-        this.player.body.setSize(26, 42); // Caixa de colisão ajustada
+        this.player.body.setSize(12, 20); // Caixa de colisão ajustada para os pés
+        this.player.body.setOffset(1, 10);
 
-        // Toca animação inicial
-        this.player.play('policial_parado');
+        // Exibe o jogador olhado para frente no início
+        this.player.setFrame(0);
 
-        // Colisão com obstáculos
+        // Colisões do jogador
         this.physics.add.collider(this.player, this._mesaDetetive);
         this.physics.add.collider(this.player, this._paredeTop);
         this.physics.add.collider(this.player, this._paredeLeft);
@@ -305,6 +322,7 @@ export class TutorialScene extends Phaser.Scene {
 
         if (this._keys.left.isDown  || this._wasd.left.isDown)  vx = -vel;
         else if (this._keys.right.isDown || this._wasd.right.isDown) vx = vel;
+
         if (this._keys.up.isDown    || this._wasd.up.isDown)    vy = -vel;
         else if (this._keys.down.isDown  || this._wasd.down.isDown)  vy = vel;
 
@@ -312,15 +330,18 @@ export class TutorialScene extends Phaser.Scene {
 
         this.player.body.setVelocity(vx, vy);
 
-        // 🚶 CONTROLE DE ANIMAÇÕES DO PERSONAGEM
-        if (vx !== 0 || vy !== 0) {
-            // Inverte a imagem horizontalmente se estiver indo para a esquerda
-            if (vx < 0) this.player.setFlipX(true);
-            else if (vx > 0) this.player.setFlipX(false);
-
-            this.player.anims.play('policial_andar', true);
+        // 🚶 ANIMAÇÃO DE ACORDO COM A DIREÇÃO
+        if (vx < 0) {
+            this.player.anims.play('andar_esquerda', true);
+        } else if (vx > 0) {
+            this.player.anims.play('andar_direita', true);
+        } else if (vy < 0) {
+            this.player.anims.play('andar_cima', true);
+        } else if (vy > 0) {
+            this.player.anims.play('andar_baixo', true);
         } else {
-            this.player.anims.play('policial_parado', true);
+            // Parar animação e manter no primeiro quadro da direção
+            this.player.anims.stop();
         }
     }
 
@@ -369,7 +390,7 @@ export class TutorialScene extends Phaser.Scene {
             this._phoneInterval = setInterval(startRing, 2500);
             startRing();
         } catch (e) {
-            // Silêncio se Web Audio não disponível
+            // Silêncio caso Web Audio esteja bloqueado
         }
     }
 
