@@ -5,7 +5,8 @@
 import { BootScene }       from './scenes/boot.js';
 import { MenuScene }       from './scenes/menu.js';
 import { TutorialScene }   from './scenes/tutorial.js';
-import { Cena2Scene }  from './scenes/cena2.js';
+import { Cena2Scene }      from './scenes/cena2.js';
+import { Cena3Scene }      from './scenes/cena3.js';       
 import { MapaScene }       from './scenes/map.js';
 import { DialogueScene }   from './scenes/dialogue.js';
 import { InventoryScene }  from './scenes/inventory.js';
@@ -30,6 +31,7 @@ const config = {
         MenuScene,
         TutorialScene,
         Cena2Scene,
+        Cena3Scene,        
         MapaScene,
         DialogueScene,
         InventoryScene,
