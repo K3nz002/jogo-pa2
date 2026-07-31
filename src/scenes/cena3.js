@@ -1,24 +1,24 @@
 /**
- * Cena3Scene — Cena 03: Lanchonete (Local de Trabalho da Vítima)
+ * Cena3Scene — Cena 03: Lanchonete (Local de Encontro da Vítima)
  *
- * O jogador investiga o ambiente de trabalho da vítima, analisa as gravações
- * das câmeras de segurança (prova crucial) e colhe o depoimento do gerente.
- * Ao concluir, libera a transição para a fase final de Julgamento / Confronto.
+ * O jogador investiga o local de encontro, coleta o copo com cianeto/nota bancária
+ * e colhe o depoimento da testemunha sobre Marco (Chefe da Empresa).
+ * Ao concluir, libera a transição para a fase final na Delegacia.
  */
 import { GameState } from '../utils/GameState.js';
 
 const DIALOGO_CENA03 = [
-    { falante: 'policial', texto: 'Boa noite. Sou o detetive responsável pelo caso. A vítima trabalhava aqui, correto?' },
-    { falante: 'gerente', texto: 'Sim, ela é nossa atendente. Estamos todos desesperados sem notícias dela!' },
-    { falante: 'policial', texto: 'Verifiquei o sistema de câmeras de segurança do balcão. Você notou algo estranho na última noite?' },
-    { falante: 'gerente', texto: 'O ex-parceiro dela apareceu aqui alterado, fazendo ameaças e tentando forçá-la a ir embora. Nós ameaçamos chamar a polícia e ele fugiu.' },
-    { falante: 'policial', texto: 'Consegui isolar o trecho das gravações da câmera. A gravação mostra claramente a abordagem agressiva dele.' },
-    { falante: 'gerente', texto: 'Isso é terrível! Por favor, use essas imagens para prender esse sujeito antes que algo pior aconteça.' },
-    { falante: 'policial', texto: 'Com essas gravações e o histórico de mensagens, temos provas irrefutáveis. Estou emitindo o mandado de prisão imediato.' }
+    { falante: 'policial', texto: 'Boa noite. Sou o detetive responsável. A vítima, Ana Vilanova, esteve aqui na última noite?' },
+    { falante: 'gerente', texto: 'Sim, detetive! Ela estava sentada na mesa do fundo com o chefe dela, o Marco (Chefe da Empresa).' },
+    { falante: 'policial', texto: 'Você notou alguma atitude suspeita durante a conversa deles?' },
+    { falante: 'gerente', texto: 'Ele serviu um copo de uísque para ela. Logo depois, a Ana começou a passar mal e ele a tirou daqui às pressas!' },
+    { falante: 'policial', texto: 'Examinando o local, encontramos a nota da dívida de R$ 2,3 milhões e vestígios de cianeto no copo.' },
+    { falante: 'gerente', texto: 'Meu Deus, ele envenenou a garota?! Que absurdo! Por favor, use isso para prender esse homem!' },
+    { falante: 'policial', texto: 'Com essa prova material e o seu depoimento, temos o suficiente. Estou retornando para a delegacia.' }
 ];
 
-const TEXTO_EVIDENCIA = "Você acessou o computador do balcão e recuperou as gravações do circuito interno de TV (CFTV). O vídeo mostra o suspeito intimidando e perseguindo a vítima no local de trabalho.";
-const TEXTO_BLOQUEIO = "Examine o sistema de câmeras de segurança no balcão antes de interrogar o gerente.";
+const TEXTO_EVIDENCIA = "Você analisou a mesa reservada. Encontrou a nota de cobrança de R$ 2,3 milhões e o copo de uísque com vestígios de cianeto deixado por Marco (Chefe da Empresa).";
+const TEXTO_BLOQUEIO = "Examine as provas na mesa do fundo antes de interrogar a testemunha.";
 
 export class Cena3Scene extends Phaser.Scene {
     constructor() {
@@ -104,7 +104,7 @@ export class Cena3Scene extends Phaser.Scene {
         const mesa1 = this.add.rectangle(200, 500, 100, 80, 0x78350f).setDepth(3);
         mesa1.setStrokeStyle(2, 0x92400e);
         this.physics.add.existing(mesa1, true);
-        this.add.text(200, 500, '🍔', { fontSize: '28px' }).setOrigin(0.5).setDepth(4);
+        this.add.text(200, 500, '🥃', { fontSize: '28px' }).setOrigin(0.5).setDepth(4);
 
         const mesa2 = this.add.rectangle(w - 200, 500, 100, 80, 0x78350f).setDepth(3);
         mesa2.setStrokeStyle(2, 0x92400e);
@@ -123,7 +123,7 @@ export class Cena3Scene extends Phaser.Scene {
         this._gerenteIcon = this.add.text(this._gerenteX, this._gerenteY - 28, '👨‍🍳', { fontSize: '22px' })
             .setOrigin(0.5).setDepth(11);
 
-        this.add.text(this._gerenteX, this._gerenteY + 35, 'GERENTE', {
+        this.add.text(this._gerenteX, this._gerenteY + 35, 'TESTEMUNHA', {
             fontSize: '11px', fontFamily: "'Courier New', monospace",
             color: '#4ade80', backgroundColor: '#0a0a1a99', padding: { x: 4, y: 2 }
         }).setOrigin(0.5).setDepth(11);
@@ -132,13 +132,13 @@ export class Cena3Scene extends Phaser.Scene {
     }
 
     _criarPontoEvidencia(w, h) {
-        this._evidenciaX = w / 2 + 120;
-        this._evidenciaY = 280;
+        this._evidenciaX = 200;
+        this._evidenciaY = 500;
 
         this._evidencia = this.add.rectangle(this._evidenciaX, this._evidenciaY, 36, 36, 0xd97706).setDepth(6);
         this._evidencia.setInteractive({ useHandCursor: true });
 
-        this._evidenciaIcon = this.add.text(this._evidenciaX, this._evidenciaY, '🖥️', { fontSize: '22px' })
+        this._evidenciaIcon = this.add.text(this._evidenciaX, this._evidenciaY, '🔍', { fontSize: '22px' })
             .setOrigin(0.5).setDepth(7);
 
         this._evidenciaPulse = this.add.circle(this._evidenciaX, this._evidenciaY, 25, 0xf59e0b, 0).setDepth(4);
@@ -187,7 +187,7 @@ export class Cena3Scene extends Phaser.Scene {
         this._instrBg.setStrokeStyle(1, 0xd97706, 0.5);
 
         this._instrText = this.add.text(w / 2, h - 80,
-            'Acesse o monitor do balcão para verificar o sistema de câmeras (CFTV)', {
+            'Examine a mesa reservada para coletar as evidências do crime', {
                 fontSize: '15px', fontFamily: "'Courier New', monospace",
                 color: '#fef3c7', align: 'center'
             }).setOrigin(0.5).setDepth(101);
@@ -281,7 +281,7 @@ export class Cena3Scene extends Phaser.Scene {
         bg.setStrokeStyle(2, 0xd97706, 0.8);
         this._popupEvidenciaGrupo.push(bg);
 
-        const titulo = this.add.text(cx, cy - 90, 'GRAVAÇÕES DE CÂMERA (CFTV)', {
+        const titulo = this.add.text(cx, cy - 90, 'EVIDÊNCIAS NO LOCAL (MESA)', {
             fontSize: '18px', fontFamily: "'Courier New', monospace",
             color: '#fbbf24', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(202);
@@ -293,11 +293,11 @@ export class Cena3Scene extends Phaser.Scene {
         }).setOrigin(0.5).setDepth(202);
         this._popupEvidenciaGrupo.push(texto);
 
-        const btnBg = this.add.rectangle(cx, cy + 90, 220, 48, 0xd97706).setDepth(203);
+        const btnBg = this.add.rectangle(cx, cy + 90, 240, 48, 0xd97706).setDepth(203);
         btnBg.setInteractive({ useHandCursor: true });
         this._popupEvidenciaGrupo.push(btnBg);
 
-        const btnText = this.add.text(cx, cy + 90, '📹 EXTRAIR VÍDEO', {
+        const btnText = this.add.text(cx, cy + 90, '💼 COLETAR PROVAS', {
             fontSize: '16px', fontFamily: "'Courier New', monospace", color: '#ffffff', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(204);
         btnText.setInteractive({ useHandCursor: true });
@@ -312,8 +312,9 @@ export class Cena3Scene extends Phaser.Scene {
         if (this._evidenciaEncontrada) return;
         this._evidenciaEncontrada = true;
 
-        GameState.adicionarItem('gravacao_cftv_lanchonete');
-        GameState.anotarPista('video_agressao_lanchonete');
+        GameState.adicionarItem('frasco_cianeto');
+        GameState.adicionarItem('nota_divida');
+        GameState.anotarPista('pista_whisky_cianeto');
 
         this._popupEvidenciaGrupo.forEach(o => o.destroy());
         if (this._popupOverlay) this._popupOverlay.destroy();
@@ -322,7 +323,7 @@ export class Cena3Scene extends Phaser.Scene {
         this._evidenciaIcon.destroy();
         this._evidenciaPulse.destroy();
 
-        this._instrText.setText('Agora interrogue o gerente da lanchonete');
+        this._instrText.setText('Agora interrogue a testemunha da lanchonete');
         this._instrText.setColor('#fbbf24');
 
         this._fase = 'exploracao';
@@ -358,7 +359,7 @@ export class Cena3Scene extends Phaser.Scene {
         this._retratoBoxDir = this.add.rectangle(width - 90, boxY, 90, 110, 0x1e293b).setDepth(151);
         this._retratoEmojiDir = this.add.text(width - 90, boxY - 10, '👨‍🍳', { fontSize: '38px' }).setOrigin(0.5).setDepth(152);
         this._nomeBadgeDirBg = this.add.rectangle(width - 90, boxY + 40, 90, 22, 0x16a34a).setDepth(152);
-        this._nomeTextDir = this.add.text(width - 90, boxY + 40, 'GERENTE', { fontSize: '10px', fontFamily: "'Courier New', monospace", color: '#fff', fontStyle: 'bold' }).setOrigin(0.5).setDepth(153);
+        this._nomeTextDir = this.add.text(width - 90, boxY + 40, 'TESTEMUNHA', { fontSize: '10px', fontFamily: "'Courier New', monospace", color: '#fff', fontStyle: 'bold' }).setOrigin(0.5).setDepth(153);
         this._dialogoGrupo.push(this._retratoBoxDir, this._retratoEmojiDir, this._nomeBadgeDirBg, this._nomeTextDir);
 
         // Texto principal
@@ -461,10 +462,10 @@ export class Cena3Scene extends Phaser.Scene {
                 this._dialogoGrupo.forEach(obj => obj.destroy());
                 this._dialogoGrupo = [];
 
-                GameState.anotarPista('depoimento_gerente_lanchonete');
+                GameState.anotarPista('depoimento_testemunha_lanchonete');
                 GameState.registrarAnotacaoInterrogatorio(
-                    'gerente', 'Gerente da Lanchonete', GameState.diaAtual,
-                    'Depoimento e imagens confirmam perseguição e ameaças. Provas suficientes para a prisão do agressor.'
+                    'testemunha', 'Testemunha (Lanchonete)', GameState.diaAtual,
+                    'Viu Marco (Chefe da Empresa) servindo uísque para Ana Vilanova e saindo apressado após ela passar mal.'
                 );
 
                 this.time.delayedCall(400, () => this._mostrarPopupMissao());
@@ -491,7 +492,7 @@ export class Cena3Scene extends Phaser.Scene {
         const icone = this.add.text(cx, cy - 110, '⚖️', { fontSize: '42px' }).setOrigin(0.5).setDepth(202);
         this._missaoGrupo.push(icone);
 
-        const titulo = this.add.text(cx, cy - 55, 'CASO PRONTO PARA CONFRONTO', {
+        const titulo = this.add.text(cx, cy - 55, 'DOSSIÊ DE INVESTIGAÇÃO PRONTO', {
             fontSize: '20px', fontFamily: "'Courier New', monospace",
             color: '#f8fafc', fontStyle: 'bold', letterSpacing: 2
         }).setOrigin(0.5).setDepth(202);
@@ -503,17 +504,17 @@ export class Cena3Scene extends Phaser.Scene {
         }).setOrigin(0.5).setDepth(202);
         this._missaoGrupo.push(objetivo);
 
-        const pista = this.add.text(cx, cy + 45, '🔍  Provas Coletadas: Mensagens de violência\npsicológica + Vídeo CFTV de perseguição', {
+        const pista = this.add.text(cx, cy + 45, '🔍  Provas Coletadas: Copo com Cianeto +\nNota de Dívida de R$ 2,3 Mi + Testemunho', {
             fontSize: '14px', fontFamily: "'Courier New', monospace",
             color: '#94a3b8', align: 'center', lineSpacing: 5
         }).setOrigin(0.5).setDepth(202);
         this._missaoGrupo.push(pista);
 
-        const btnBg = this.add.rectangle(cx, cy + 120, 240, 55, 0xd97706).setDepth(203);
+        const btnBg = this.add.rectangle(cx, cy + 120, 260, 55, 0xd97706).setDepth(203);
         btnBg.setInteractive({ useHandCursor: true });
         this._missaoGrupo.push(btnBg);
 
-        const btnText = this.add.text(cx, cy + 120, '▶  PRENDER AGRESSOR', {
+        const btnText = this.add.text(cx, cy + 120, '▶  IR PARA A DELEGACIA', {
             fontSize: '17px', fontFamily: "'Courier New', monospace",
             color: '#ffffff', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(204);
@@ -567,7 +568,7 @@ export class Cena3Scene extends Phaser.Scene {
 
         const { width, height } = this.scale;
         this._saidaText = this.add.text(width / 2, height - 100,
-            'Dirija-se à saída para conduzir o suspeito à delegacia', {
+            'Dirija-se à saída para concluir a acusação na delegacia', {
                 fontSize: '16px', fontFamily: "'Courier New', monospace",
                 color: '#fbbf24', align: 'center',
                 backgroundColor: '#050c18dd', padding: { x: 15, y: 8 }
@@ -584,7 +585,7 @@ export class Cena3Scene extends Phaser.Scene {
         this._fase = 'transicao';
 
         GameState.flags.fase_03_concluida = true;
-        GameState.flags.objetivo_atual = 'confrontar_agressor';
+        GameState.flags.objetivo_atual = 'acusar_suspeito';
 
         this.cameras.main.fadeOut(1200, 0, 0, 0);
         this.cameras.main.once('camerafadeoutcomplete', () => {
