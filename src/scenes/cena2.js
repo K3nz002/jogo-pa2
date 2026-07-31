@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+//import Phaser from 'phaser';
 import GameState from '../GameState.js';
 import { DIALOGO_CENA02 } from '../dialogos.js';
 
