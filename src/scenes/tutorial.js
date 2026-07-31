@@ -30,10 +30,11 @@ export class TutorialScene extends Phaser.Scene {
         this._overlapPorta = null; // Guardar referência do overlap para remoção segura
     }
 
-    this.load.spritesheet('policial_sheet', 'assets/sprites/Protagonista.png', {
-    frameWidth: 14,
-    frameHeight: 31
-});
+    preload() {
+        this.load.spritesheet('policial_sheet', 'assets/sprites/Protagonista.png', {
+            frameWidth: 14,
+            frameHeight: 31
+        });
     }
 
     create() {
