@@ -1,29 +1,30 @@
 {
   "npcs": {
-    "vizinho": {
-      "nome": "Vizinho",
+    "testemunha": {
+      "nome": "Testemunha da Lanchonete",
       "falas": {
         "1": [
-          "Vizinho: Olha, detetive... O marido dela grita muito com ela, mas ontem a confusão foi diferente.",
-          "Vizinho: Ele não estava em casa. Quem veio aqui foi o pai dele.",
-          "Vizinho: Eu ouvi móveis quebrando e ela gritando. Depois, vi o velho empurrando a moça para dentro de um carro escuro."
+          "Testemunha: Boa noite, detetive. Eu lembro da jovem Ana sim!",
+          "Testemunha: Ela estava sentada naquela mesa no fundo com um homem de terno, o Marco (Chefe).",
+          "Testemunha: Ele pediu um uísque para ela. Depois de um tempo, ela começou a passar mal e ele a tirou daqui apressado.",
+          "Testemunha: Na mesa, ficou um frasco estranho caindo no chão e um papel de cobrança bancária."
         ]
       },
       "pontosChave": {
-        "1": "Confirma que o companheiro não estava na cena do crime. Aponta o pai do companheiro (familiar) como o agressor."
+        "1": "Confirma que Marco esteve com Ana na lanchonete, serviu uísque a ela e saiu apressado."
       }
     },
-    "companheiro": {
-      "nome": "Companheiro",
+    "ricardo": {
+      "nome": "Ricardo (Pai da Vítima)",
       "falas": {
         "1": [
-          "Companheiro: O que a polícia está fazendo aqui?! Cadê a minha mulher?",
-          "Companheiro: Eu sei que sou duro com ela, que exijo saber onde ela vai... mas eu nunca a machucaria! Cheguei e a casa estava assim!",
-          "Companheiro: O bilhete? O objeto no chão? ...Meu Deus. Meu pai tem a chave daqui. Ele sempre foi obcecado por ela, e eu nunca quis acreditar. O que ele fez com ela?!"
+          "Ricardo: Detetive! Eu estava procurando minha filha por toda a cidade!",
+          "Ricardo: Disseram que viram o chefe dela, o Marco, colocando ela num carro aqui perto.",
+          "Ricardo: Por favor, faça alguma coisa! Aquele homem estava chantageando minha filha por causa de segredos da empresa!"
         ]
       },
       "pontosChave": {
-        "1": "Admite a violência psicológica, mas demonstra desespero real. Confirma que o pai (familiar) assediava a vítima e tem acesso à casa."
+        "1": "Pai da vítima confirma que Marco chantageava Ana e foi visto com ela perto da lanchonete."
       }
     }
   }
