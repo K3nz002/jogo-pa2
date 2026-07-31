@@ -1,0 +1,30 @@
+{
+  "npcs": {
+    "vizinho": {
+      "nome": "Vizinho",
+      "falas": {
+        "1": [
+          "Vizinho: Olha, detetive... O marido dela grita muito com ela, mas ontem a confusão foi diferente.",
+          "Vizinho: Ele não estava em casa. Quem veio aqui foi o pai dele.",
+          "Vizinho: Eu ouvi móveis quebrando e ela gritando. Depois, vi o velho empurrando a moça para dentro de um carro escuro."
+        ]
+      },
+      "pontosChave": {
+        "1": "Confirma que o companheiro não estava na cena do crime. Aponta o pai do companheiro (familiar) como o agressor."
+      }
+    },
+    "companheiro": {
+      "nome": "Companheiro",
+      "falas": {
+        "1": [
+          "Companheiro: O que a polícia está fazendo aqui?! Cadê a minha mulher?",
+          "Companheiro: Eu sei que sou duro com ela, que exijo saber onde ela vai... mas eu nunca a machucaria! Cheguei e a casa estava assim!",
+          "Companheiro: O bilhete? O objeto no chão? ...Meu Deus. Meu pai tem a chave daqui. Ele sempre foi obcecado por ela, e eu nunca quis acreditar. O que ele fez com ela?!"
+        ]
+      },
+      "pontosChave": {
+        "1": "Admite a violência psicológica, mas demonstra desespero real. Confirma que o pai (familiar) assediava a vítima e tem acesso à casa."
+      }
+    }
+  }
+}
