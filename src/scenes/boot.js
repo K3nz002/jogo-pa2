@@ -48,15 +48,17 @@ export class BootScene extends Phaser.Scene {
             loadingText.setText(`Carregando: ${file.key}...`);
         });
 
-        // Carregar dados do jogo
+        // Carregar dados do jogo (Atualizado com as Cenas 2 e 3)
         this.load.json('dialogos', 'assets/dialogos.json');
+        this.load.json('dialogos_cena02', 'assets/dialogos_cena02.json');
+        this.load.json('dialogos_cena03', 'assets/dialogos_cena03.json');
         this.load.json('pistas',   'assets/pistas.json');
 
         // Sprites de NPCs
         this.load.image('npc-2', 'assets/sprites/NPC-2.png');
 
         // Áudio (adicionar arquivos .mp3/.wav em assets/audio/ quando disponíveis)
-        // this.load.audio('musica_menu',     'assets/audio/menu.mp3');
+        // this.load.audio('musica_menu',      'assets/audio/menu.mp3');
         // this.load.audio('musica_suspense', 'assets/audio/suspense.mp3');
         // this.load.audio('sfx_pista',       'assets/audio/pista.wav');
         // this.load.audio('sfx_acerto',      'assets/audio/acerto.wav');
