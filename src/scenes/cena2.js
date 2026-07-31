@@ -1,6 +1,12 @@
 //import Phaser from 'phaser';
 import { GameState } from '../utils/GameState.js';
-import DIALOGO_CENA02 from '../../assets/dialogos_cena02.json' assert { type: 'json' };
+
+const DIALOGO_CENA02 = [
+    { falante: 'policial', texto: 'Boa noite. Estou investigando o caso da Ana Vilanova.' },
+    { falante: 'suspeito', texto: 'Não sei de nada, detetive! Eu mal conhecia a vítima.' },
+    { falante: 'policial', texto: 'Encontramos marcas e evidências que apontam para o seu envolvimento.' },
+    { falante: 'suspeito', texto: 'Isso é um engano! Você não pode me prender sem provas concretas!' }
+];
 
 export default class Cena02 extends Phaser.Scene {
     constructor() {
@@ -9,6 +15,10 @@ export default class Cena02 extends Phaser.Scene {
 
     create() {
         const { width, height } = this.scale;
+
+        // O restante da sua função create continua aqui...
+    }
+}
 
         // Estado inicial da cena
         this._fase = 'dialogo';
