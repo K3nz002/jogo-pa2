@@ -1,10 +1,5 @@
 /**
  * TutorialScene — Cena 01: O Chamado (Tutorial e Introdução)
- *
- * Ambiente: Interior de uma delegacia.
- * O jogador aprende a se mover, interage com um telefone que está tocando
- * e recebe seu primeiro caso via diálogo estilo Stardew Valley.
- * Ao final, a porta da delegacia é destacada e a cena transiciona para a Cena2Scene.
  */
 import { GameState } from '../utils/GameState.js';
 
@@ -21,12 +16,10 @@ export class TutorialScene extends Phaser.Scene {
         this._phoneGain = null;
         this._phoneInterval = null;
         this._ultimaDirecao = 'baixo'; // Guarda a última direção para o frame ocioso (Idle)
+        this._twTimer = null;          // Garantindo inicialização da referência do Timer
     }
 
     preload() {
-        // --------------------------------------------------------------------------
-        // 📥 CARREGAMENTO DO SPRITESHEET DO PROTAGONISTA (14x31 pixels por quadro)
-        // --------------------------------------------------------------------------
         this.load.spritesheet('policial_sheet', 'assets/Protagonista.png', {
             frameWidth: 14,
             frameHeight: 31
@@ -36,32 +29,20 @@ export class TutorialScene extends Phaser.Scene {
     create() {
         const { width, height } = this.scale;
 
-        // 🎬 Criar Animações Globais (4 Direções)
         this._criarAnimacoesGlobais();
-
-        // Fundo da delegacia 
         this._criarDelegacia(width, height);
-
-        // Player com Sprite Animado
         this._criarPlayer(width, height);
-
-        // Telefone 
         this._criarTelefone(width, height);
-
-        // Porta de saída 
         this._criarPorta(width, height);
-
-        // UI do Tutorial 
         this._criarUITutorial(width, height);
-
-        // Controles 
         this._configurarControles();
-
-        // Iniciar som do telefone 
         this._iniciarSomTelefone();
 
         // Fade in
         this.cameras.main.fadeIn(900, 0, 0, 0);
+
+        // Garante que o shutdown limpe eventos ao trocar de cena
+        this.events.once('shutdown', this._limparRecursos, this);
     }
 
     update() {
@@ -112,8 +93,6 @@ export class TutorialScene extends Phaser.Scene {
     _criarDelegacia(w, h) {
         // Chão
         this.add.rectangle(w / 2, h / 2, w, h, 0x111d36);
-
-        // Grade de textura
         this.add.grid(w / 2, h / 2, w, h, 64, 64, 0, 0, 0x1e293b, 0.08);
 
         // Paredes
@@ -164,7 +143,7 @@ export class TutorialScene extends Phaser.Scene {
         // Cadeira secundária
         this.add.rectangle(1100, 590, 45, 45, 0x2d1a0a).setDepth(3);
 
-        // Quadro de avisos (direita na parede)
+        // Quadro de avisos
         const quadroAvisos = this.add.rectangle(1400, 94, 180, 60, 0x1e293b);
         quadroAvisos.setStrokeStyle(2, 0x475569);
         this.add.text(1400, 85, '📌 QUADRO DE AVISOS', {
@@ -272,8 +251,6 @@ export class TutorialScene extends Phaser.Scene {
         this._portaHighlight = this.add.rectangle(this._portaX, this._portaY, 30, 120, 0xfbbf24, 0)
             .setStrokeStyle(3, 0xfbbf24, 0).setDepth(3);
 
-        this._portaSetaVisible = false;
-
         this._portaZona = this.add.rectangle(this._portaX, this._portaY, 40, 120, 0x000000, 0).setDepth(0);
         this.physics.add.existing(this._portaZona, true);
     }
@@ -324,7 +301,6 @@ export class TutorialScene extends Phaser.Scene {
 
         this.player.body.setVelocity(vx, vy);
 
-        // 🚶 ANIMAÇÃO CORRIGIDA DE ACORDO COM A DIREÇÃO
         if (vx < 0) {
             this.player.anims.play('andar_esquerda', true);
             this._ultimaDirecao = 'esquerda';
@@ -339,7 +315,6 @@ export class TutorialScene extends Phaser.Scene {
             this._ultimaDirecao = 'baixo';
         } else {
             this.player.anims.stop();
-            // Reseta para o frame parado correto conforme a última direção
             switch(this._ultimaDirecao) {
                 case 'baixo': this.player.setFrame(0); break;
                 case 'esquerda': this.player.setFrame(4); break;
@@ -562,7 +537,6 @@ export class TutorialScene extends Phaser.Scene {
         });
         this._dialogoGrupo.push(this._continuarText);
 
-        // CORREÇÃO: Listener único via "once" para evitar acumulação de ouvintes no input
         this._pointerHandler = () => {
             if (this._fase === 'dialogo') this._avancarDialogo();
         };
@@ -600,16 +574,21 @@ export class TutorialScene extends Phaser.Scene {
     }
 
     _typewriterText(fullText) {
+        if (this._twTimer) {
+            this._twTimer.remove();
+            this._twTimer = null;
+        }
+
         this._dialogoText.setText('');
         this._twChars = fullText.split('');
         this._twIndex = 0;
         this._twTarget = fullText;
 
-        if (this._twTimer) this._twTimer.remove();
         this._twTimer = this.time.addEvent({
             delay: 28,
             repeat: this._twChars.length - 1,
             callback: () => {
+                if (!this._dialogoText || !this._dialogoText.active) return; // Evita erros se destruído
                 this._twIndex++;
                 this._dialogoText.setText(this._twTarget.substring(0, this._twIndex));
             }
@@ -618,7 +597,10 @@ export class TutorialScene extends Phaser.Scene {
 
     _avancarDialogo() {
         if (this._twIndex < this._twChars.length) {
-            if (this._twTimer) this._twTimer.remove();
+            if (this._twTimer) {
+                this._twTimer.remove();
+                this._twTimer = null;
+            }
             this._dialogoText.setText(this._twTarget);
             this._twIndex = this._twChars.length;
             return;
@@ -631,7 +613,11 @@ export class TutorialScene extends Phaser.Scene {
     _encerrarDialogo() {
         this._fase = 'encerrando_dialogo';
 
-        // Remove ouvinte de clique do diálogo
+        if (this._twTimer) {
+            this._twTimer.remove();
+            this._twTimer = null;
+        }
+
         if (this._pointerHandler) {
             this.input.off('pointerdown', this._pointerHandler);
         }
@@ -641,14 +627,7 @@ export class TutorialScene extends Phaser.Scene {
             alpha: 0, duration: 400,
             onComplete: () => {
                 this._dialogoGrupo.forEach(obj => obj.destroy());
-                this._continuarText.destroy();
-                this._contadorText.destroy();
-                this._dialogoText.destroy();
-                this._nomeText.destroy();
-                this._nomeBadgeBg.destroy();
-                this._retratoEmoji.destroy();
-                this._retratoBox.destroy();
-                this._silhueta.destroy();
+                this._dialogoGrupo = [];
 
                 this.time.delayedCall(300, () => this._mostrarPopupMissao());
             }
@@ -811,11 +790,16 @@ export class TutorialScene extends Phaser.Scene {
         });
     }
 
-    shutdown() {
+    _limparRecursos() {
         this._pararSomTelefone();
-    }
 
-    destroy() {
-        this._pararSomTelefone();
+        if (this._twTimer) {
+            this._twTimer.remove();
+            this._twTimer = null;
+        }
+
+        if (this._pointerHandler) {
+            this.input.off('pointerdown', this._pointerHandler);
+        }
     }
 }
