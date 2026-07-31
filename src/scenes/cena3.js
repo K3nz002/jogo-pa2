@@ -54,13 +54,15 @@ export class Cena3Scene extends Phaser.Scene {
 
     update() {
         if (this._fase !== 'exploracao' && this._fase !== 'saida') {
-            this.player.body.setVelocity(0);
+            if (this.player && this.player.body) {
+                this.player.body.setVelocity(0);
+            }
             return;
         }
 
         this._processarMovimento();
 
-        if (this._playerIcon) {
+        if (this._playerIcon && this.player) {
             this._playerIcon.setPosition(this.player.x, this.player.y - 28);
         }
     }
@@ -96,19 +98,19 @@ export class Cena3Scene extends Phaser.Scene {
 
     _criarMobilia(w, h) {
         // Balcão Principal
-        const balcao = this.add.rectangle(w / 2, 300, 500, 70, 0x292524).setDepth(3);
-        balcao.setStrokeStyle(2, 0x78350f);
-        this.physics.add.existing(balcao, true);
+        this._balcao = this.add.rectangle(w / 2, 300, 500, 70, 0x292524).setDepth(3);
+        this._balcao.setStrokeStyle(2, 0x78350f);
+        this.physics.add.existing(this._balcao, true);
 
         // Mesas com cadeiras para os clientes
-        const mesa1 = this.add.rectangle(200, 500, 100, 80, 0x78350f).setDepth(3);
-        mesa1.setStrokeStyle(2, 0x92400e);
-        this.physics.add.existing(mesa1, true);
+        this._mesa1 = this.add.rectangle(200, 500, 100, 80, 0x78350f).setDepth(3);
+        this._mesa1.setStrokeStyle(2, 0x92400e);
+        this.physics.add.existing(this._mesa1, true);
         this.add.text(200, 500, '🥃', { fontSize: '28px' }).setOrigin(0.5).setDepth(4);
 
-        const mesa2 = this.add.rectangle(w - 200, 500, 100, 80, 0x78350f).setDepth(3);
-        mesa2.setStrokeStyle(2, 0x92400e);
-        this.physics.add.existing(mesa2, true);
+        this._mesa2 = this.add.rectangle(w - 200, 500, 100, 80, 0x78350f).setDepth(3);
+        this._mesa2.setStrokeStyle(2, 0x92400e);
+        this.physics.add.existing(this._mesa2, true);
         this.add.text(w - 200, 500, '🥤', { fontSize: '28px' }).setOrigin(0.5).setDepth(4);
     }
 
@@ -176,10 +178,16 @@ export class Cena3Scene extends Phaser.Scene {
 
         this._playerIcon = this.add.text(startX, startY - 28, '👮', { fontSize: '22px' }).setOrigin(0.5).setDepth(11);
 
+        // Colisão com as paredes
         this.physics.add.collider(this.player, this._paredeTop);
         this.physics.add.collider(this.player, this._paredeLeft);
         this.physics.add.collider(this.player, this._paredeRight);
         this.physics.add.collider(this.player, this._paredeBottom);
+
+        // Colisão com a mobília da lanchonete
+        if (this._balcao) this.physics.add.collider(this.player, this._balcao);
+        if (this._mesa1) this.physics.add.collider(this.player, this._mesa1);
+        if (this._mesa2) this.physics.add.collider(this.player, this._mesa2);
     }
 
     _criarUIInstrucao(w, h) {
@@ -252,8 +260,8 @@ export class Cena3Scene extends Phaser.Scene {
         }).setOrigin(0.5).setDepth(151);
 
         this.time.delayedCall(3000, () => {
-            if (this._balaoBloqueio) this._balaoBloqueio.destroy();
-            if (this._balaoTexto) this._balaoTexto.destroy();
+            if (this._balaoBloqueio && this._balaoBloqueio.active) this._balaoBloqueio.destroy();
+            if (this._balaoTexto && this._balaoTexto.active) this._balaoTexto.destroy();
             this._balaoBloqueio = null;
             this._balaoTexto = null;
         });
@@ -388,7 +396,13 @@ export class Cena3Scene extends Phaser.Scene {
         this._dialogoClickHandler = () => {
             if (this._fase === 'dialogo') this._avancarDialogo();
         };
-        this.input.on('pointerdown', this._dialogoClickHandler);
+
+        // Adiciona um pequeno atraso para registrar o evento de clique e evitar que o clique inicial pule a fala
+        this.time.delayedCall(50, () => {
+            if (this._fase === 'dialogo') {
+                this.input.on('pointerdown', this._dialogoClickHandler);
+            }
+        });
 
         this._mostrarFala();
     }
@@ -450,6 +464,8 @@ export class Cena3Scene extends Phaser.Scene {
     _encerrarDialogo() {
         this._dialogoConcluido = true;
         this._fase = 'encerrando_dialogo';
+
+        if (this._twTimer) this._twTimer.remove();
 
         if (this._dialogoClickHandler) {
             this.input.off('pointerdown', this._dialogoClickHandler);
