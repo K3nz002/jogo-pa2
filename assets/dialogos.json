@@ -1,13 +1,13 @@
 {
   "npcs": {
     "mae": {
-      "nome": "Mãe da Vítima",
+      "nome": "Elena (Mãe da Vítima)",
       "falas": {
         "1": [
-          "Mãe: Delegacia de Ceilândia? Por favor, me ajude!",
-          "Mãe: Minha filha não voltou para casa desde ontem. Isso nunca aconteceu antes.",
-          "Mãe: Ela me disse que ia passar na casa de uma amiga após o expediente.",
-          "Mãe: O endereço é Rua das Rosas, casa 12. Por favor, encontre minha menina."
+          "Elena: Delegacia de Ceilândia? Por favor, me ajude!",
+          "Elena: Minha filha não voltou para casa desde ontem. Isso nunca aconteceu antes.",
+          "Elena: Ela me disse que ia passar na casa de uma amiga após o expediente.",
+          "Elena: O endereço é Rua das Rosas, casa 12. Por favor, encontre minha menina."
         ]
       },
       "pontosChave": {
