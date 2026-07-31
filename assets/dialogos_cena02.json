@@ -1,96 +1,17 @@
 {
-  "cenario_02": {
-    "metadata": {
-      "id_cena": "02_casa_amiga",
-      "ambiente": "Sala de estar da casa da amiga",
-      "clima": "Melancólico e tenso",
-      "personagens": ["Policial", "Amiga"],
-      "objetivos": [
-        "Vasculhar a sala",
-        "Achar a mochila da vítima",
-        "Interrogar a amiga"
-      ]
-    },
-    "estado_inicial": {
-      "ui_visual": "Amiga no cenário com animação de nervosismo e choro. Jogador move a detetive livremente.",
-      "interacoes_disponiveis": ["amiga_bloqueada", "mochila_vitima"],
-      "variaveis": {
-        "mochila_encontrada": false,
-        "dialogo_concluido": false
-      }
-    },
-    "eventos": {
-      "interacao_npc_bloqueado": {
-        "gatilho": "clique_amiga",
-        "condicao": "mochila_encontrada == false",
-        "acao": "exibir_balao_texto",
-        "texto": "Me desculpe, policial... as coisas dela estão ali no canto, eu não consigo parar de chorar para falar agora."
+  "npcs": {
+    "amiga": {
+      "nome": "Amiga de Ana",
+      "falas": {
+        "1": [
+          "Amiga: Detetive, a Ana estava muito eufórica e nervosa nos últimos dias...",
+          "Amiga: Ela descobriu uma fraude gigantesca na empresa onde trabalha. Disse que o chefe dela estava desviando milhões!",
+          "Amiga: Ela marcou de se encontrar com o Marco (Chefe) numa lanchonete ontem à noite para confrontá-lo.",
+          "Amiga: Depois dessa reunião, ela nunca mais respondeu minhas mensagens..."
+        ]
       },
-      "interacao_objeto_mochila": {
-        "gatilho": "clique_mochila",
-        "condicao": "mochila_encontrada == false",
-        "acao": "abrir_popup_sistema",
-        "popup": {
-          "imagem": "sprite_foto_vitima",
-          "texto": "Você encontrou uma foto da vítima e um bilhete amassado com os dizeres: 'Não aguento mais o jeito que ele me olha quando estou na casa deles'.",
-          "botao_acao": "[ GUARDAR ]"
-        },
-        "ao_clicar_guardar": {
-          "atualizar_variavel": { "mochila_encontrada": true },
-          "adicionar_inventario": ["foto_vitima", "bilhete_suspeito"]
-        }
-      },
-      "interacao_npc_interrogatorio": {
-        "gatilho": "clique_amiga",
-        "condicao": "mochila_encontrada == true",
-        "acao": "iniciar_dialogo_principal",
-        "dialogo": [
-          {
-            "ator": "Policial",
-            "fala": "Encontrei a mochila dela ali no canto com esta foto e este bilhete. Ela costumava esquecer as coisas assim?"
-          },
-          {
-            "ator": "Amiga",
-            "fala": "A culpa é toda minha... Ela veio aqui ontem exausta. O parceiro dela controla tudo: o dinheiro, as roupas, as amizades."
-          },
-          {
-            "ator": "Policial",
-            "fala": "O que aconteceu entre vocês duas na noite passada?"
-          },
-          {
-            "ator": "Amiga",
-            "fala": "Eu fui negligente e perdi a paciência. Mandei ela simplesmente largar ele. Ela se sentiu julgada, defendeu ele e nós brigamos. Ela saiu correndo e deixou tudo pra trás... Eu devia ter acolhido, não julgado."
-          },
-          {
-            "ator": "Policial",
-            "fala": "Este bilhete fala sobre 'o jeito que ele olha na casa deles'. Você sabe o que significa?"
-          },
-          {
-            "ator": "Amiga",
-            "fala": "Deve ser o companheiro. Eles moram muito perto da família dele. Sei que depois daqui, o turno dela ia começar. Ela deve ter ido direto para a lanchonete onde trabalha."
-          }
-        ],
-        "ao_finalizar_dialogo": {
-          "atualizar_variavel": { "dialogo_concluido": true },
-          "chamar_evento": "atualizacao_de_missao"
-        }
-      }
-    },
-    "saida_de_cena": {
-      "atualizacao_de_missao": {
-        "gatilho": "dialogo_concluido == true",
-        "acao": "abrir_popup_sistema",
-        "popup": {
-          "titulo": "Novo Objetivo",
-          "texto": "Investigar a lanchonete. Pista Nova: Relato de violência psicológica e bilhete suspeito.",
-          "botao_acao": "[ VAMOS ]"
-        }
-      },
-      "transicao": {
-        "gatilho_visual": "Destacar porta de saída na sala",
-        "interacao": "clique_porta",
-        "efeito": "fade_out",
-        "carregar_cena": "cenario_03_lanchonete"
+      "pontosChave": {
+        "1": "Revela que Ana descobriu fraudes na empresa e tinha uma reunião com Marco (Chefe) na lanchonete."
       }
     }
   }
