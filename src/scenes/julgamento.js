@@ -25,7 +25,7 @@ export class JulgamentoScene extends Phaser.Scene {
         // Cabeçalho
         this.add.rectangle(width / 2, 65, width, 130, 0x1e293b);
         this.add.rectangle(width / 2, 130, width, 2, 0x6366f1, 0.4);
-        this.add.text(width / 2, 35, '⚖️   DIA DO JULGAMENTO', {
+        this.add.text(width / 2, 35, '⚖️    DIA DO JULGAMENTO', {
             fontSize: '44px', fontFamily: "'Courier New', monospace",
             color: '#f8fafc', fontStyle: 'bold', letterSpacing: 6
         }).setOrigin(0.5);
@@ -43,7 +43,7 @@ export class JulgamentoScene extends Phaser.Scene {
         const btnI = this.add.rectangle(width / 2, height - 55, 460, 50, 0x1e293b)
             .setInteractive({ useHandCursor: true });
         btnI.setStrokeStyle(1, 0x475569);
-        this.add.text(width / 2, height - 55, '📁  Arquivar o caso', {
+        this.add.text(width / 2, height - 55, '📁    Arquivar o caso', {
             fontSize: '16px', fontFamily: "'Courier New', monospace", color: '#475569'
         }).setOrigin(0.5);
         btnI.on('pointerover', () => btnI.setFillStyle(0x334155));
@@ -54,9 +54,9 @@ export class JulgamentoScene extends Phaser.Scene {
     _criarPainelPistas(pistasData, width, height) {
         const lx = 370, lw = 680;
         const panelTopY = 145;
-        const panelH = height - 245; // espaço entre cabeçalho e botão arquivar
+        const panelH = height - 245;
 
-        this.add.text(lx, panelTopY, '📓  PISTAS E DEPOIMENTOS:', {
+        this.add.text(lx, panelTopY, '📓    PISTAS E DEPOIMENTOS:', {
             fontSize: '17px', fontFamily: "'Courier New', monospace",
             color: '#fbbf24', fontStyle: 'bold'
         }).setOrigin(0.5);
@@ -89,7 +89,7 @@ export class JulgamentoScene extends Phaser.Scene {
             const bg = this.add.rectangle(lx, py + 32, lw - 10, 60, 0x1e293b);
             bg.setStrokeStyle(1, 0x334155);
             container.add(bg);
-            const t1 = this.add.text(lx - lw / 2 + 20, py + 10, `🔍  ${pista.titulo}`, {
+            const t1 = this.add.text(lx - lw / 2 + 20, py + 10, `🔍    ${pista.titulo}`, {
                 fontSize: '14px', fontFamily: "'Courier New', monospace", color: '#fbbf24', fontStyle: 'bold'
             }).setOrigin(0);
             container.add(t1);
@@ -104,7 +104,7 @@ export class JulgamentoScene extends Phaser.Scene {
         // Anotações de interrogatórios
         if (anotacoes.length > 0) {
             py += 8;
-            const secTitle = this.add.text(lx, py + 10, '🗣️  DEPOIMENTOS:', {
+            const secTitle = this.add.text(lx, py + 10, '🗣️    DEPOIMENTOS:', {
                 fontSize: '15px', fontFamily: "'Courier New', monospace",
                 color: '#6366f1', fontStyle: 'bold'
             }).setOrigin(0.5);
@@ -143,18 +143,16 @@ export class JulgamentoScene extends Phaser.Scene {
         let scrollOffset = 0;
 
         if (maxScroll > 0) {
-            this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
-                scrollOffset = Phaser.Math.Clamp(scrollOffset + deltaY * 0.5, 0, maxScroll);
-                container.y = -scrollOffset;
-            });
-
-            // Scrollbar visual
             const barH = Math.max(30, (scrollH / (scrollH + maxScroll)) * scrollH);
             const barX = lx + lw / 2 - 8;
             this.add.rectangle(barX, scrollTopY + scrollH / 2, 4, scrollH, 0x1e293b, 0.5);
             const barThumb = this.add.rectangle(barX, scrollTopY + barH / 2, 4, barH, 0x6366f1, 0.6);
 
-            this.input.on('wheel', () => {
+            // Listener único para atualizar container e scrollbar
+            this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
+                scrollOffset = Phaser.Math.Clamp(scrollOffset + deltaY * 0.5, 0, maxScroll);
+                container.y = -scrollOffset;
+
                 const ratio = scrollOffset / maxScroll;
                 barThumb.y = scrollTopY + barH / 2 + ratio * (scrollH - barH);
             });
@@ -162,15 +160,15 @@ export class JulgamentoScene extends Phaser.Scene {
     }
 
     _criarPainelSuspeitos(width, height) {
-        this.add.text(width - 660, 160, '👤  ESCOLHA O SUSPEITO:', {
+        this.add.text(width - 660, 160, '👤    ESCOLHA O SUSPEITO:', {
             fontSize: '17px', fontFamily: "'Courier New', monospace",
             color: '#6366f1', fontStyle: 'bold'
         }).setOrigin(0);
 
         const suspeitos = [
-            { id: 'marco',   nome: 'Marco',  papel: 'Chefe da Empresa', cor: 0xef4444, x: 1120 },
-            { id: 'elena',   nome: 'Elena',  papel: 'Mãe da Vítima',  cor: 0xc026d3, x: 1380 },
-            { id: 'ricardo', nome: 'Ricardo',  papel: 'Pai da Vítima', cor: 0xfbbf24, x: 1640 },
+            { id: 'marco',   nome: 'Marco',   papel: 'Chefe da Empresa', cor: 0xef4444, x: 1120 },
+            { id: 'elena',   nome: 'Elena',   papel: 'Mãe da Vítima',   cor: 0xc026d3, x: 1380 },
+            { id: 'ricardo', nome: 'Ricardo', papel: 'Pai da Vítima',   cor: 0xfbbf24, x: 1640 },
         ];
 
         suspeitos.forEach(sus => {
@@ -224,14 +222,15 @@ export class JulgamentoScene extends Phaser.Scene {
         });
     }
 
-    //  Lógica de Acusação
-
     _acusar(suspeito) {
         const resultado = GameState.calcularFinal(suspeito.id);
         this._mostrarFinal(resultado, suspeito);
     }
 
     _mostrarFinal(resultado, suspeito) {
+        // Desativa eventos do mouse para não dar erro durante/após a transição
+        this.input.off('wheel');
+
         this.cameras.main.fadeOut(550, 0, 0, 0);
         this.cameras.main.once('camerafadeoutcomplete', () => {
             this.children.removeAll(true);
@@ -239,8 +238,6 @@ export class JulgamentoScene extends Phaser.Scene {
             this.cameras.main.fadeIn(900);
         });
     }
-
-    //  Telas de Final
 
     _criarTelaFinal(resultado, suspeito) {
         const { width, height } = this.scale;
@@ -296,7 +293,6 @@ export class JulgamentoScene extends Phaser.Scene {
 
         // Fundo
         this.add.rectangle(width / 2, height / 2, width, height, final.corFundo, 0.6);
-        this.add.rectangle(width / 2, height / 2, width, height, 0x0f172a, 0);
 
         // Card central
         const cardW = 900, cardH = 520;
@@ -328,7 +324,7 @@ export class JulgamentoScene extends Phaser.Scene {
 
         // Estatísticas
         this.add.text(width / 2, height / 2 + 215,
-            `Pistas coletadas: ${GameState.pistasAnotadas.length} / 7   •   Dias utilizados: ${GameState.diaAtual} de ${GameState.maxDias}`,
+            `Pistas coletadas: ${GameState.pistasAnotadas.length} / 7    •    Dias utilizados: ${GameState.diaAtual} de ${GameState.maxDias}`,
             {
                 fontSize: '14px', fontFamily: "'Courier New', monospace", color: '#334155'
             }
