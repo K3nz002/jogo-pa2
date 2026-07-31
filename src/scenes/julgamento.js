@@ -1,7 +1,7 @@
 /**
- * JulgamentoScene — Cena do Dia do Julgamento Final.
- * O jogador escolhe quem acusar com base nas pistas coletadas.
- * Apresenta 3 finais possíveis: verdadeiro, errado e inconclusivo.
+ * JulgamentoScene — Dossiê Final na Delegacia de Polícia.
+ * O jogador analisa o relatório de provas e decide quem mandar prender.
+ * Apresenta 4 desfechos: prisão efetuada, falta de provas, erro de investigação e caso arquivado.
  */
 import { GameState } from '../utils/GameState.js';
 
@@ -22,29 +22,29 @@ export class JulgamentoScene extends Phaser.Scene {
         // Fundo
         this.add.rectangle(width / 2, height / 2, width, height, 0x0f172a);
 
-        // Cabeçalho
+        // Cabeçalho da Delegacia
         this.add.rectangle(width / 2, 65, width, 130, 0x1e293b);
         this.add.rectangle(width / 2, 130, width, 2, 0x6366f1, 0.4);
-        this.add.text(width / 2, 35, '⚖️    DIA DO JULGAMENTO', {
-            fontSize: '44px', fontFamily: "'Courier New', monospace",
-            color: '#f8fafc', fontStyle: 'bold', letterSpacing: 6
+        this.add.text(width / 2, 35, '🚨    DELEGACIA DE POLÍCIA — DOSSIÊ FINAL', {
+            fontSize: '36px', fontFamily: "'Courier New', monospace",
+            color: '#f8fafc', fontStyle: 'bold', letterSpacing: 4
         }).setOrigin(0.5);
-        this.add.text(width / 2, 95, 'Com base nas pistas coletadas, quem você acusa pelo desaparecimento de Ana?', {
-            fontSize: '16px', fontFamily: "'Courier New', monospace", color: '#64748b'
+        this.add.text(width / 2, 95, 'Com as provas e depoimentos reunidos, quem você vai mandar a equipe prender?', {
+            fontSize: '15px', fontFamily: "'Courier New', monospace", color: '#64748b'
         }).setOrigin(0.5);
 
-        // Painel esquerdo: pistas coletadas
+        // Painel esquerdo: pistas e depoimentos
         this._criarPainelPistas(pistasData, width, height);
 
         // Painel direito: suspeitos
         this._criarPainelSuspeitos(width, height);
 
-        // Botão inconclusivo
-        const btnI = this.add.rectangle(width / 2, height - 55, 460, 50, 0x1e293b)
+        // Botão para deixar o caso em aberto
+        const btnI = this.add.rectangle(width / 2, height - 55, 520, 50, 0x1e293b)
             .setInteractive({ useHandCursor: true });
         btnI.setStrokeStyle(1, 0x475569);
-        this.add.text(width / 2, height - 55, '📁    Arquivar o caso', {
-            fontSize: '16px', fontFamily: "'Courier New', monospace", color: '#475569'
+        this.add.text(width / 2, height - 55, '📁    Falta de provas / Deixar o caso em aberto', {
+            fontSize: '16px', fontFamily: "'Courier New', monospace", color: '#94a3b8'
         }).setOrigin(0.5);
         btnI.on('pointerover', () => btnI.setFillStyle(0x334155));
         btnI.on('pointerout', () => btnI.setFillStyle(0x1e293b));
@@ -56,7 +56,7 @@ export class JulgamentoScene extends Phaser.Scene {
         const panelTopY = 145;
         const panelH = height - 245;
 
-        this.add.text(lx, panelTopY, '📓    PISTAS E DEPOIMENTOS:', {
+        this.add.text(lx, panelTopY, '📓    PISTAS E DEPOIMENTOS COLETADOS:', {
             fontSize: '17px', fontFamily: "'Courier New', monospace",
             color: '#fbbf24', fontStyle: 'bold'
         }).setOrigin(0.5);
@@ -68,7 +68,7 @@ export class JulgamentoScene extends Phaser.Scene {
             this.add.text(lx, panelTopY + 80, 'Nenhuma pista coletada!', {
                 fontSize: '16px', fontFamily: "'Courier New', monospace", color: '#ef4444'
             }).setOrigin(0.5);
-            this.add.text(lx, panelTopY + 120, 'Você não investigou nada.\nDificilmente conseguirá uma condenação.', {
+            this.add.text(lx, panelTopY + 120, 'Você não investigou nada.\nO delegado não aprovará nenhum mandado de prisão.', {
                 fontSize: '14px', fontFamily: "'Courier New', monospace",
                 color: '#475569', align: 'center', lineSpacing: 6
             }).setOrigin(0.5);
@@ -104,7 +104,7 @@ export class JulgamentoScene extends Phaser.Scene {
         // Anotações de interrogatórios
         if (anotacoes.length > 0) {
             py += 8;
-            const secTitle = this.add.text(lx, py + 10, '🗣️    DEPOIMENTOS:', {
+            const secTitle = this.add.text(lx, py + 10, '🗣️    DEPOIMENTOS DA INVESTIGAÇÃO:', {
                 fontSize: '15px', fontFamily: "'Courier New', monospace",
                 color: '#6366f1', fontStyle: 'bold'
             }).setOrigin(0.5);
@@ -132,13 +132,13 @@ export class JulgamentoScene extends Phaser.Scene {
 
         const totalContentH = py - scrollTopY;
 
-        // Máscara para recortar conteúdo
+        // Máscara de recorte
         const maskShape = this.make.graphics({ x: 0, y: 0, add: false });
         maskShape.fillStyle(0xffffff);
         maskShape.fillRect(lx - lw / 2, scrollTopY, lw, scrollH);
         container.setMask(maskShape.createGeometryMask());
 
-        // Scroll por roda do mouse
+        // Scroll do mouse
         const maxScroll = Math.max(0, totalContentH - scrollH + 20);
         let scrollOffset = 0;
 
@@ -148,7 +148,6 @@ export class JulgamentoScene extends Phaser.Scene {
             this.add.rectangle(barX, scrollTopY + scrollH / 2, 4, scrollH, 0x1e293b, 0.5);
             const barThumb = this.add.rectangle(barX, scrollTopY + barH / 2, 4, barH, 0x6366f1, 0.6);
 
-            // Listener único para atualizar container e scrollbar
             this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
                 scrollOffset = Phaser.Math.Clamp(scrollOffset + deltaY * 0.5, 0, maxScroll);
                 container.y = -scrollOffset;
@@ -160,7 +159,7 @@ export class JulgamentoScene extends Phaser.Scene {
     }
 
     _criarPainelSuspeitos(width, height) {
-        this.add.text(width - 660, 160, '👤    ESCOLHA O SUSPEITO:', {
+        this.add.text(width - 660, 160, '👤    EMITIR MANDADO DE PRISÃO:', {
             fontSize: '17px', fontFamily: "'Courier New', monospace",
             color: '#6366f1', fontStyle: 'bold'
         }).setOrigin(0);
@@ -175,35 +174,34 @@ export class JulgamentoScene extends Phaser.Scene {
             const cardH = 380;
             const cardY = height / 2 + 60;
 
-            // Card
+            // Card do suspeito
             const card = this.add.rectangle(sus.x, cardY, 220, cardH, 0x1e293b)
                 .setInteractive({ useHandCursor: true });
             card.setStrokeStyle(2, sus.cor, 0.35);
 
-            // Silhueta do suspeito
+            // Silhueta
             this.add.rectangle(sus.x, cardY - 100, 52, 80, sus.cor, 0.85);
             this.add.circle(sus.x, cardY - 155, 24, sus.cor, 0.85);
 
-            // Nome
+            // Nome e Papel
             this.add.text(sus.x, cardY + 5, sus.nome, {
                 fontSize: '15px', fontFamily: "'Courier New', monospace",
                 color: '#f1f5f9', fontStyle: 'bold', wordWrap: { width: 190 }, align: 'center'
             }).setOrigin(0.5);
 
-            // Papel
             this.add.text(sus.x, cardY + 35, sus.papel, {
                 fontSize: '13px', fontFamily: "'Courier New', monospace", color: '#64748b'
             }).setOrigin(0.5);
 
-            // Botão Acusar
-            const btnAcusar = this.add.rectangle(sus.x, cardY + 140, 190, 46, sus.cor)
+            // Botão Prender
+            const btnPrender = this.add.rectangle(sus.x, cardY + 140, 190, 46, sus.cor)
                 .setInteractive({ useHandCursor: true });
-            this.add.text(sus.x, cardY + 140, 'ACUSAR', {
+            this.add.text(sus.x, cardY + 140, 'PRENDER', {
                 fontSize: '17px', fontFamily: "'Courier New', monospace",
                 color: '#ffffff', fontStyle: 'bold'
             }).setOrigin(0.5);
 
-            // Hover
+            // Efeitos visuais de Hover
             card.on('pointerover', () => {
                 card.setStrokeStyle(3, sus.cor, 0.85);
                 this.tweens.add({ targets: card, scaleX: 1.04, scaleY: 1.04, duration: 140 });
@@ -212,23 +210,22 @@ export class JulgamentoScene extends Phaser.Scene {
                 card.setStrokeStyle(2, sus.cor, 0.35);
                 this.tweens.add({ targets: card, scaleX: 1, scaleY: 1, duration: 140 });
             });
-            btnAcusar.on('pointerover', () => btnAcusar.setFillStyle(
+            btnPrender.on('pointerover', () => btnPrender.setFillStyle(
                 Phaser.Display.Color.ValueToColor(sus.cor).darken(20).color
             ));
-            btnAcusar.on('pointerout', () => btnAcusar.setFillStyle(sus.cor));
+            btnPrender.on('pointerout', () => btnPrender.setFillStyle(sus.cor));
 
-            btnAcusar.on('pointerdown', () => this._acusar(sus));
-            card.on('pointerdown', () => this._acusar(sus));
+            btnPrender.on('pointerdown', () => this._prender(sus));
+            card.on('pointerdown', () => this._prender(sus));
         });
     }
 
-    _acusar(suspeito) {
+    _prender(suspeito) {
         const resultado = GameState.calcularFinal(suspeito.id);
         this._mostrarFinal(resultado, suspeito);
     }
 
     _mostrarFinal(resultado, suspeito) {
-        // Desativa eventos do mouse para não dar erro durante/após a transição
         this.input.off('wheel');
 
         this.cameras.main.fadeOut(550, 0, 0, 0);
@@ -245,92 +242,89 @@ export class JulgamentoScene extends Phaser.Scene {
         const finais = {
             verdadeiro: {
                 corFundo: 0x052e16, borderCor: 0x22c55e,
-                emoji: '🏆', titulo: '✓  CASO RESOLVIDO',
-                subtitulo: 'Marco Ferreira foi preso e indiciado!',
+                emoji: '🚨', titulo: '✓  PRISÃO EFETUADA!',
+                subtitulo: 'Marco Ferreira foi conduzido à delegacia e confessou!',
                 texto:
-                    '\n\n\nParabéns, Detetive.\n\n' +
-                    'Com as provas reunidas, Marco Ferreira foi indiciado pelo\n' +
-                    'desaparecimento de Ana.\n\n' +
-                    'O motivo: uma dívida impagável de R$ 2,3 milhões.\n' +
-                    'O veneno foi misturado ao whisky durante a "reunião de negócios".\n\n' +
-                    'A família Vilanova finalmente terá justiça.'
+                    '\n\n\nExcelente trabalho, Detetive.\n\n' +
+                    'Com base nas provas apresentadas, a equipe interceptou Marco Ferreira.\n' +
+                    'Confrontado na delegacia com o frasco de cianeto e as dívidas de R$ 2,3 milhões,\n' +
+                    'ele não teve como negar e confessou o crime.\n\n' +
+                    'Marco foi algemado e transferido para a penitenciária.\n' +
+                    'O caso foi encerrado com sucesso!'
             },
             sem_provas: {
                 corFundo: 0x1c1403, borderCor: 0xfbbf24,
-                emoji: '⚠️', titulo: '⚠  SUSPEITO CERTO, PROVAS INSUFICIENTES',
-                subtitulo: 'Você apontou para o culpado — mas sem evidências suficientes.',
+                emoji: '⚠️', titulo: '⚠️  PROVAS INSUFICIENTES',
+                subtitulo: 'Você apontou o suspeito certo, mas o delegado barrou o mandado.',
                 texto:
                     '\n\nVocê desconfiou de Marco — e estava certo.\n' +
-                    'Mas sem provas sólidas, o promotor não conseguiu uma condenação.\n\n' +
-                    'Marco foi solto por falta de evidências.\n' +
-                    'O caso permanece aberto, e o criminoso continua livre.\n\n' +
-                    'Colete mais pistas antes de acusar alguém na próxima vez.'
+                    'Porém, sem provas suficientes no relatório, o mandado de prisão foi negado.\n\n' +
+                    'Marco percebeu a movimentação da polícia e fugiu da cidade.\n' +
+                    'O caso permanece sem solução.'
             },
             errado: {
                 corFundo: 0x1c0505, borderCor: 0xef4444,
-                emoji: '❌', titulo: '✗  ACUSAÇÃO ERRADA',
-                subtitulo: `Um inocente foi acusado: ${suspeito?.nome || '?'}.`,
+                emoji: '❌', titulo: '✗  ERRO DE INVESTIGAÇÃO',
+                subtitulo: `Um inocente foi detido: ${suspeito?.nome || '?'}.`,
                 texto:
-                    `\n\n\nVocê acusou ${suspeito?.nome || 'um inocente'}, mas errou o alvo.\n\n` +
-                    'Enquanto o processo judicial se arrastava, Marco Ferreira\n' +
-                    'destruiu as evidências restantes e fugiu do país.\n\n' +
-                    'O verdadeiro culpado do desaparecimento de Ana nunca foi punido.\n' +
-                    'Um inocente pagou o preço.'
+                    `\n\n\nVocê mandou prender ${suspeito?.nome || 'um inocente'}, mas cometeu um erro grave.\n\n` +
+                    'Enquanto a equipe perdia tempo interrogando a pessoa errada na delegacia,\n' +
+                    'Marco Ferreira destruiu as evidências restantes e fugiu do país.\n\n' +
+                    'O verdadeiro culpado ficou impune e um inocente teve a vida destruída.'
             },
             inconclusivo: {
                 corFundo: 0x050e1a, borderCor: 0x3b82f6,
-                emoji: '📁', titulo: '📁  CASO ARQUIVADO',
-                subtitulo: 'A investigação não chegou a uma conclusão.',
+                emoji: '📁', titulo: '📁  CASO SEM RESPOSTAS',
+                subtitulo: 'A investigação foi encerrada sem pedidos de prisão.',
                 texto:
-                    '\n\n\nVocê não conseguiu reunir provas suficientes para acusar ninguém.\n\n' +
-                    'O caso de desaparecimento de Ana foi arquivado.\n' +
-                    'Marco, o verdadeiro culpado, continuou sua vida normalmente.\n\n' +
-                    'A justiça nem sempre prevalece.'
+                    '\n\n\nVocê optou por não emitir nenhum mandado de prisão.\n\n' +
+                    'Sem um suspeito principal definido, o dossiê foi arquivado na delegacia.\n' +
+                    'Marco continuou sua vida normalmente e o mistério permanece.'
             }
         };
 
         const final = finais[resultado] || finais.inconclusivo;
 
-        // Fundo
-        this.add.rectangle(width / 2, height / 2, width, height, final.corFundo, 0.6);
+        // Fundo com brilho suave da cor do resultado
+        this.add.rectangle(width / 2, height / 2, width, height, final.corFundo, 0.65);
 
-        // Card central
+        // Card central de encerramento
         const cardW = 900, cardH = 520;
         const card = this.add.rectangle(width / 2, height / 2, cardW, cardH, 0x0b1120, 0.95);
         card.setStrokeStyle(3, final.borderCor, 0.85);
 
-        // Emoji grande
+        // Emoji
         this.add.text(width / 2, height / 2 - 220, final.emoji, { fontSize: '64px' }).setOrigin(0.5);
 
         // Título
         this.add.text(width / 2, height / 2 - 148, final.titulo, {
-            fontSize: '44px', fontFamily: "'Courier New', monospace",
+            fontSize: '40px', fontFamily: "'Courier New', monospace",
             color: '#f8fafc', fontStyle: 'bold'
         }).setOrigin(0.5);
 
         // Subtítulo
         this.add.text(width / 2, height / 2 - 93, final.subtitulo, {
-            fontSize: '19px', fontFamily: "'Courier New', monospace", color: '#94a3b8'
+            fontSize: '18px', fontFamily: "'Courier New', monospace", color: '#94a3b8'
         }).setOrigin(0.5);
 
-        // Separador
+        // Linha divisória
         this.add.rectangle(width / 2, height / 2 - 66, 640, 2, final.borderCor, 0.45);
 
-        // Texto narrativo
+        // Texto com a narrativa do desfecho
         this.add.text(width / 2, height / 2 + 10, final.texto, {
             fontSize: '17px', fontFamily: "'Courier New', monospace",
             color: '#e2e8f0', wordWrap: { width: 820 }, align: 'center', lineSpacing: 8
         }).setOrigin(0.5);
 
-        // Estatísticas
+        // Estatísticas da partida
         this.add.text(width / 2, height / 2 + 215,
             `Pistas coletadas: ${GameState.pistasAnotadas.length} / 7    •    Dias utilizados: ${GameState.diaAtual} de ${GameState.maxDias}`,
             {
-                fontSize: '14px', fontFamily: "'Courier New', monospace", color: '#334155'
+                fontSize: '14px', fontFamily: "'Courier New', monospace", color: '#475569'
             }
         ).setOrigin(0.5);
 
-        // Botão Jogar Novamente
+        // Botão para Jogar Novamente
         const btnReinicio = this.add.rectangle(width / 2, height - 65, 380, 58, 0x6366f1)
             .setInteractive({ useHandCursor: true });
         this.add.text(width / 2, height - 65, '↩  JOGAR NOVAMENTE', {
