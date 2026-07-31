@@ -1,86 +1,17 @@
 {
   "npcs": {
-    "elena": {
-      "nome": "Elena",
+    "mae": {
+      "nome": "Mãe da Vítima",
       "falas": {
         "1": [
-          "Elena: Detetive, que alívio que veio pessoalmente...",
-          "Elena: Carlos foi encontrado ontem à noite no escritório. O médico diz que foi envenenamento.",
-          "Elena: Não tenho ideia de quem faria isso. Meu marido era um homem bom, mas tinha muitos inimigos nos negócios.",
-          "Elena: Por favor... encontre quem fez isso com ele."
-        ],
-        "2": [
-          "Elena: Você voltou. Tem novas pistas?",
-          "Elena: Agora que você pergunta... no dia do crime, por volta das 20h, vi o Sr. Ferreira saindo pela porta dos fundos da mansão.",
-          "Elena: Na época achei estranho, mas não dei importância. Será que tem algo a ver?",
-          "Elena: Ele e Carlos estavam tendo desentendimentos sérios sobre dinheiro da empresa."
-        ],
-        "3": [
-          "Elena: O prazo está se esgotando, detetive. O criminoso pode fugir a qualquer momento.",
-          "Elena: Há algo que preciso te contar. Carlos tinha um seguro de vida de valor considerável, em meu nome.",
-          "Elena: Sei que parece suspeito, mas eu jamais faria isso. Carlos era tudo para mim.",
-          "Elena: Confio na sua investigação. Faça justiça."
+          "Mãe: Delegacia de Ceilândia? Por favor, me ajude!",
+          "Mãe: Minha filha não voltou para casa desde ontem. Isso nunca aconteceu antes.",
+          "Mãe: Ela me disse que ia passar na casa de uma amiga após o expediente.",
+          "Mãe: O endereço é Rua das Rosas, casa 12. Por favor, encontre minha menina."
         ]
       },
       "pontosChave": {
-        "1": "Elena confirma que Carlos foi envenenado. Tinha inimigos nos negócios.",
-        "2": "Elena viu Marco Ferreira saindo pela porta dos fundos no dia do crime (~20h). Desentendimentos sobre dinheiro.",
-        "3": "Elena revela seguro de vida em seu nome, mas nega envolvimento."
-      }
-    },
-    "marco": {
-      "nome": "Marco",
-      "falas": {
-        "1": [
-          "Marco: Carlos? Uma tragédia, sem dúvida. Éramos sócios e amigos há mais de vinte anos.",
-          "Marco: Mas não sei o que quer dizer com 'pistas'. Eu estava em um jantar de negócios naquela noite.",
-          "Marco: Posso provar com testemunhas. Sugiro investigar outros ângulos.",
-          "Marco: Boa sorte na investigação, detetive."
-        ],
-        "2": [
-          "Marco: Você de novo? Já disse tudo que sei.",
-          "Marco: Dívida? Que absurdo. Qualquer documento que diga isso foi falsificado.",
-          "Marco: Cuidado com o que acusa, detetive. Tenho uma equipe de advogados.",
-          "Marco: Essa conversa acabou."
-        ],
-        "3": [
-          "Marco: *Marco está visivelmente nervoso, transpirando*",
-          "Marco: Essa impressão digital... Eu posso explicar. Sim, estive na mansão. Mas Carlos já estava morto!",
-          "Marco: Juro! Fui tentar resolver nossa situação financeira e o encontrei no chão do escritório. Entrei em pânico e fugi.",
-          "Marco: Eu não o matei. Você precisa acreditar em mim!"
-        ]
-      },
-      "pontosChave": {
-        "1": "Marco alega álibi com jantar de negócios. Nega conhecimento sobre pistas.",
-        "2": "Marco nega a dívida e ameaça com advogados. Comportamento defensivo e agressivo.",
-        "3": "Marco admite ter estado na mansão, mas diz que Carlos já estava morto quando chegou. Visivelmente nervoso."
-      }
-    },
-    "ricardo": {
-      "nome": "Ricardo",
-      "falas": {
-        "1": [
-          "Ricardo: Trinta anos servindo esta família... nunca vi o Sr. Carlos tão perturbado quanto nas últimas semanas.",
-          "Ricardo: Ele recebia ligações tarde da noite. Quando desligava, ficava pálido, como se tivesse levado um susto.",
-          "Ricardo: Não sei de quem eram as ligações, mas claramente o deixavam com muito medo."
-        ],
-        "2": [
-          "Ricardo: Preciso ter cuidado, detetive. Há pessoas poderosas envolvidas.",
-          "Ricardo: Mas sim... no dia do crime, antes do jantar, ouvi uma discussão acalorada no escritório.",
-          "Ricardo: Não reconheci a voz com clareza, mas era definitivamente um homem.",
-          "Ricardo: Depois ouvi um carro arrancar pela garagem de serviço, que fica no fundo da propriedade."
-        ],
-        "3": [
-          "Ricardo: Não aguento mais esse peso na consciência. Preciso falar com você.",
-          "Ricardo: Foi o Sr. Marco Ferreira. Eu o vi no jardim, perto do bar externo, antes do jantar.",
-          "Ricardo: Ele mexeu nas garrafas. Na hora achei que era só um convidado bebendo. Mas agora entendo o que foi.",
-          "Ricardo: Fiquei com medo de falar antes. Mas não posso deixar o Sr. Carlos sem justiça."
-        ]
-      },
-      "pontosChave": {
-        "1": "Carlos estava perturbado nas últimas semanas. Recebia ligações ameaçadoras à noite.",
-        "2": "Ricardo ouviu discussão acalorada no escritório antes do jantar. Um carro saiu pela garagem de serviço.",
-        "3": "Ricardo viu Marco Ferreira mexendo nas garrafas no bar do jardim antes do jantar. Testemunho direto."
+        "1": "A vítima está desaparecida. O último paradeiro conhecido foi a casa da amiga."
       }
     }
   }
