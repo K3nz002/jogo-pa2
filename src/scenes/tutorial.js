@@ -15,17 +15,17 @@ export class TutorialScene extends Phaser.Scene {
 
     init() {
         this.velocidadePlayer = 260;
-        this._fase = 'movimento';      // 'movimento' | 'perto_telefone' | 'dialogo' | 'missao' | 'saida'
+        this._fase = 'movimento';      // 'movimento' | 'perto_telefone' | 'dialogo' | 'missao' | 'saida' | 'transicao'
         this._dialogoIndex = 0;
         this._phoneOsc = null;         // oscilador Web Audio do telefone
         this._phoneGain = null;
         this._phoneInterval = null;
+        this._ultimaDirecao = 'baixo'; // Guarda a última direção para o frame ocioso (Idle)
     }
 
     preload() {
         // --------------------------------------------------------------------------
         // 📥 CARREGAMENTO DO SPRITESHEET DO PROTAGONISTA (14x31 pixels por quadro)
-        // ⚠️ Certifique-se de que o arquivo 'Protagonista.png' está na pasta 'assets/'
         // --------------------------------------------------------------------------
         this.load.spritesheet('policial_sheet', 'assets/Protagonista.png', {
             frameWidth: 14,
@@ -65,9 +65,11 @@ export class TutorialScene extends Phaser.Scene {
     }
 
     update() {
-        if (this._fase === 'dialogo' || this._fase === 'missao') {
-            this.player.body.setVelocity(0);
-            this.player.anims.stop();
+        if (this._fase === 'dialogo' || this._fase === 'missao' || this._fase === 'transicao') {
+            if (this.player && this.player.body) {
+                this.player.body.setVelocity(0);
+                this.player.anims.stop();
+            }
             return;
         }
 
@@ -76,10 +78,8 @@ export class TutorialScene extends Phaser.Scene {
     }
 
     _criarAnimacoesGlobais() {
-        // Cria as animações apenas se não existirem no cache
         if (this.anims.exists('andar_baixo')) return;
 
-        // ⬇️ Linha 1 (Frames 0, 1, 2, 3) - Andar para Baixo
         this.anims.create({
             key: 'andar_baixo',
             frames: this.anims.generateFrameNumbers('policial_sheet', { start: 0, end: 3 }),
@@ -87,7 +87,6 @@ export class TutorialScene extends Phaser.Scene {
             repeat: -1
         });
 
-        // ⬅️ Linha 2 (Frames 4, 5, 6, 7) - Andar para Esquerda
         this.anims.create({
             key: 'andar_esquerda',
             frames: this.anims.generateFrameNumbers('policial_sheet', { start: 4, end: 7 }),
@@ -95,7 +94,6 @@ export class TutorialScene extends Phaser.Scene {
             repeat: -1
         });
 
-        // ⬆️ Linha 3 (Frames 8, 9, 10, 11) - Andar para Cima
         this.anims.create({
             key: 'andar_cima',
             frames: this.anims.generateFrameNumbers('policial_sheet', { start: 8, end: 11 }),
@@ -103,7 +101,6 @@ export class TutorialScene extends Phaser.Scene {
             repeat: -1
         });
 
-        // ➡️ Linha 4 (Frames 12, 13, 14, 15) - Andar para Direita
         this.anims.create({
             key: 'andar_direita',
             frames: this.anims.generateFrameNumbers('policial_sheet', { start: 12, end: 15 }),
@@ -120,13 +117,13 @@ export class TutorialScene extends Phaser.Scene {
         this.add.grid(w / 2, h / 2, w, h, 64, 64, 0, 0, 0x1e293b, 0.08);
 
         // Paredes
-        this.add.rectangle(w / 2, 80, w, 80, 0x0a1628);                // parede superior
-        this.add.rectangle(w / 2, 120, w, 3, 0x334155, 0.9);           // rodapé superior
-        this.add.rectangle(40, h / 2, 80, h, 0x0a1628);                // parede esquerda
-        this.add.rectangle(80, h / 2, 3, h, 0x334155, 0.5);             // rodapé esquerda
-        this.add.rectangle(w - 40, h / 2, 80, h, 0x0a1628);            // parede direita
-        this.add.rectangle(w - 80, h / 2, 3, h, 0x334155, 0.5);        // rodapé direita
-        this.add.rectangle(w / 2, h - 30, w, 60, 0x0a1628);            // chão inferior
+        this.add.rectangle(w / 2, 80, w, 80, 0x0a1628);
+        this.add.rectangle(w / 2, 120, w, 3, 0x334155, 0.9);
+        this.add.rectangle(40, h / 2, 80, h, 0x0a1628);
+        this.add.rectangle(80, h / 2, 3, h, 0x334155, 0.5);
+        this.add.rectangle(w - 40, h / 2, 80, h, 0x0a1628);
+        this.add.rectangle(w - 80, h / 2, 3, h, 0x334155, 0.5);
+        this.add.rectangle(w / 2, h - 30, w, 60, 0x0a1628);
 
         // Label
         this.add.text(w / 2, 95, 'DELEGACIA DE CEILÂNDIA', {
@@ -198,18 +195,15 @@ export class TutorialScene extends Phaser.Scene {
     }
 
     _criarPlayer(w, h) {
-        // 👮 CRIAÇÃO DO PLAYER USANDO SEU NOVO SPRITE
         this.player = this.physics.add.sprite(500, 640, 'policial_sheet');
         this.player.setDepth(10);
-        this.player.setScale(2); // Aumenta um pouco o sprite pixel art para destacar na tela
+        this.player.setScale(2);
         this.player.body.setCollideWorldBounds(true);
-        this.player.body.setSize(12, 20); // Caixa de colisão ajustada para os pés
+        this.player.body.setSize(12, 20);
         this.player.body.setOffset(1, 10);
 
-        // Exibe o jogador olhado para frente no início
         this.player.setFrame(0);
 
-        // Colisões do jogador
         this.physics.add.collider(this.player, this._mesaDetetive);
         this.physics.add.collider(this.player, this._paredeTop);
         this.physics.add.collider(this.player, this._paredeLeft);
@@ -330,18 +324,28 @@ export class TutorialScene extends Phaser.Scene {
 
         this.player.body.setVelocity(vx, vy);
 
-        // 🚶 ANIMAÇÃO DE ACORDO COM A DIREÇÃO
+        // 🚶 ANIMAÇÃO CORRIGIDA DE ACORDO COM A DIREÇÃO
         if (vx < 0) {
             this.player.anims.play('andar_esquerda', true);
+            this._ultimaDirecao = 'esquerda';
         } else if (vx > 0) {
             this.player.anims.play('andar_direita', true);
+            this._ultimaDirecao = 'direita';
         } else if (vy < 0) {
             this.player.anims.play('andar_cima', true);
+            this._ultimaDirecao = 'cima';
         } else if (vy > 0) {
             this.player.anims.play('andar_baixo', true);
+            this._ultimaDirecao = 'baixo';
         } else {
-            // Parar animação e manter no primeiro quadro da direção
             this.player.anims.stop();
+            // Reseta para o frame parado correto conforme a última direção
+            switch(this._ultimaDirecao) {
+                case 'baixo': this.player.setFrame(0); break;
+                case 'esquerda': this.player.setFrame(4); break;
+                case 'cima': this.player.setFrame(8); break;
+                case 'direita': this.player.setFrame(12); break;
+            }
         }
     }
 
@@ -558,9 +562,11 @@ export class TutorialScene extends Phaser.Scene {
         });
         this._dialogoGrupo.push(this._continuarText);
 
-        this.input.on('pointerdown', () => {
+        // CORREÇÃO: Listener único via "once" para evitar acumulação de ouvintes no input
+        this._pointerHandler = () => {
             if (this._fase === 'dialogo') this._avancarDialogo();
-        });
+        };
+        this.input.on('pointerdown', this._pointerHandler);
 
         this._mostrarFala();
     }
@@ -624,6 +630,11 @@ export class TutorialScene extends Phaser.Scene {
 
     _encerrarDialogo() {
         this._fase = 'encerrando_dialogo';
+
+        // Remove ouvinte de clique do diálogo
+        if (this._pointerHandler) {
+            this.input.off('pointerdown', this._pointerHandler);
+        }
 
         this.tweens.add({
             targets: this._dialogoGrupo,
