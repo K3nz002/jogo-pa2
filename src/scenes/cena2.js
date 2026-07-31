@@ -1,6 +1,6 @@
 //import Phaser from 'phaser';
-import GameState from '../GameState.js';
-import { DIALOGO_CENA02 } from '../dialogos.js';
+import { GameState } from '../utils/GameState.js';
+import DIALOGO_CENA02 from '../../assets/dialogos_cena02.json' assert { type: 'json' };
 
 export default class Cena02 extends Phaser.Scene {
     constructor() {
