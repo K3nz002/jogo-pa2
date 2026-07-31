@@ -10,7 +10,7 @@ const DIALOGO_CENA02 = [
 
 export default class Cena02 extends Phaser.Scene {
     constructor() {
-        super({ key: 'Cena02' });
+        super({ key: 'Cena2Scene' });
     }
 
     create() {
