@@ -24,10 +24,10 @@ export default class Cena02 extends Phaser.Scene {
         this.add.rectangle(width / 2, height / 2, width, height, 0x0f172a).setDepth(0);
 
         // ==========================================
-        // 🕵️ PERSONAGEM PRINCIPAL (Com visibilidade e física)
+        // 🕵️ PERSONAGEM PRINCIPAL
         // ==========================================
         this.player = this.add.rectangle(120, height - 120, 40, 60, 0x6366f1);
-        this.player.setStrokeStyle(2, 0xffffff); // Borda branca para destacar no escuro
+        this.player.setStrokeStyle(2, 0xffffff);
         this.player.setDepth(20);
         this.physics.add.existing(this.player);
         this.player.body.setCollideWorldBounds(true);
@@ -91,9 +91,16 @@ export default class Cena02 extends Phaser.Scene {
     }
 
     update() {
-        // Acompanha a posição do texto do nome do detetive
+        // Acompanha a posição do nome do detetive
         if (this.player && this.playerLabel) {
             this.playerLabel.setPosition(this.player.x, this.player.y - 45);
+        }
+
+        // 💬 AVANÇAR DIÁLOGO COM A BARRA DE ESPAÇO
+        if (this._fase === 'dialogo') {
+            if (Phaser.Input.Keyboard.JustDown(this.keySpace)) {
+                this._avancarDialogo();
+            }
         }
 
         // 🚶 LÓGICA DE MOVIMENTAÇÃO DO PERSONAGEM
@@ -101,7 +108,6 @@ export default class Cena02 extends Phaser.Scene {
             const speed = 220;
             this.player.body.setVelocity(0);
 
-            // Controles de direção (Setas ou WASD)
             if (this.cursors.left.isDown || this.wasd.left.isDown) {
                 this.player.body.setVelocityX(-speed);
             } else if (this.cursors.right.isDown || this.wasd.right.isDown) {
@@ -299,12 +305,11 @@ export default class Cena02 extends Phaser.Scene {
         this._bilheteGrupo.push(titulo);
 
         const textoBilhete = 
-            '"Não agumento mais a pressão e as ameaças... Preciso sair da cidade.\n\n' +
+            '"Não aguento mais a pressão e as ameaças... Preciso sair da cidade.\n\n' +
             'Vou me encontrar com alguém na lanchonete hoje à noite para tentar ' +
             'resolver isso de uma vez por todas. Se algo me acontecer, ' +
             'procurem por quem estava me seguindo."';
 
-        // WordWrap garante que o texto não vaze a folha amarela
         const conteudo = this.add.text(width / 2, height / 2 - 10, textoBilhete, {
             fontSize: '15px',
             fontFamily: "'Courier New', monospace",
