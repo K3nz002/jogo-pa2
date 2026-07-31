@@ -46,7 +46,8 @@ export class TutorialScene extends Phaser.Scene {
     }
 
     update() {
-        if (this._fase === 'dialogo' || this._fase === 'missao' || this._fase === 'transicao') {
+        // Bloqueia movimentação durante diálogos, popups e transições
+        if (this._fase === 'dialogo' || this._fase === 'missao' || this._fase === 'transicao' || this._fase === 'encerrando_dialogo' || this._fase === 'saindo_missao') {
             if (this.player && this.player.body) {
                 this.player.body.setVelocity(0);
                 this.player.anims.stop();
@@ -55,7 +56,11 @@ export class TutorialScene extends Phaser.Scene {
         }
 
         this._processarMovimento();
-        this._verificarProximidadeTelefone();
+
+        // Checa proximidade do telefone apenas se ainda não atendeu
+        if (this._fase === 'movimento' || this._fase === 'perto_telefone') {
+            this._verificarProximidadeTelefone();
+        }
     }
 
     _criarAnimacoesGlobais() {
@@ -329,6 +334,10 @@ export class TutorialScene extends Phaser.Scene {
             const ctx = this.sound.context;
             if (!ctx) return;
 
+            if (ctx.state === 'suspended') {
+                ctx.resume();
+            }
+
             this._phoneGain = ctx.createGain();
             this._phoneGain.gain.value = 0;
             this._phoneGain.connect(ctx.destination);
@@ -389,8 +398,6 @@ export class TutorialScene extends Phaser.Scene {
     }
 
     _verificarProximidadeTelefone() {
-        if (this._fase !== 'movimento' && this._fase !== 'perto_telefone') return;
-
         const dist = Phaser.Math.Distance.Between(
             this.player.x, this.player.y, this._telefoneX, this._telefoneY
         );
@@ -588,7 +595,7 @@ export class TutorialScene extends Phaser.Scene {
             delay: 28,
             repeat: this._twChars.length - 1,
             callback: () => {
-                if (!this._dialogoText || !this._dialogoText.active) return; // Evita erros se destruído
+                if (!this._dialogoText || !this._dialogoText.active) return;
                 this._twIndex++;
                 this._dialogoText.setText(this._twTarget.substring(0, this._twIndex));
             }
@@ -687,7 +694,6 @@ export class TutorialScene extends Phaser.Scene {
             fontSize: '20px', fontFamily: "'Courier New', monospace",
             color: '#ffffff', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(204);
-        btnText.setInteractive({ useHandCursor: true });
         this._missaoGrupo.push(btnText);
 
         this.tweens.add({
@@ -705,7 +711,6 @@ export class TutorialScene extends Phaser.Scene {
         });
 
         btnBg.on('pointerdown', () => this._aoClicarVamos());
-        btnText.on('pointerdown', () => this._aoClicarVamos());
 
         this._missaoGrupo.forEach(obj => obj.setAlpha(0));
         this.tweens.add({
