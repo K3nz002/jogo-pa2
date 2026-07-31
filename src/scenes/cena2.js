@@ -2,10 +2,10 @@
 import { GameState } from '../utils/GameState.js';
 
 const DIALOGO_CENA02 = [
-    { falante: 'policial', texto: 'Boa noite. Estou investigando o caso da Ana Vilanova.' },
-    { falante: 'suspeito', texto: 'Não sei de nada, detetive! Eu mal conhecia a vítima.' },
-    { falante: 'policial', texto: 'Encontramos marcas e evidências que apontam para o seu envolvimento.' },
-    { falante: 'suspeito', texto: 'Isso é um engano! Você não pode me prender sem provas concretas!' }
+    { ator: 'Policial', fala: 'Boa noite. Estou investigando o caso da Ana Vilanova.' },
+    { ator: 'Amiga', fala: 'Não sei de nada, detetive! Eu mal conhecia a vítima.' },
+    { ator: 'Policial', fala: 'Encontramos marcas e evidências que apontam para o seu envolvimento.' },
+    { ator: 'Amiga', fala: 'Isso é um engano! Você não pode me prender sem provas concretas!' }
 ];
 
 export default class Cena02 extends Phaser.Scene {
