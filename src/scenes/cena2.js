@@ -15,12 +15,12 @@ export default class Cena02 extends Phaser.Scene {
     create() {
         const { width, height } = this.scale;
     
-        // Estados da cena
-        this._fase = 'dialogo';
+        // Estados da cena: 'falar_amiga' -> 'dialogo' -> 'exploracao_mochila' -> 'lendo_bilhete' -> 'missao' -> 'saida'
+        this._fase = 'falar_amiga';
         this._dialogoIndex = 0;
         this._mochilaInvestigada = false;
 
-        // Fundo básico
+        // Fundo básico do quarto
         this.add.rectangle(width / 2, height / 2, width, height, 0x0f172a).setDepth(0);
 
         // ==========================================
@@ -36,6 +36,35 @@ export default class Cena02 extends Phaser.Scene {
             fontSize: '12px', fontFamily: "'Courier New', monospace", color: '#ffffff', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(20);
 
+        // ==========================================
+        // 👧 AMIGA DA VÍTIMA (NPC)
+        // ==========================================
+        this._amigaX = width - 200;
+        this._amigaY = height - 120;
+
+        this.amiga = this.add.rectangle(this._amigaX, this._amigaY, 40, 60, 0xec4899).setDepth(10); // Rosa
+        this.amiga.setStrokeStyle(2, 0xfbcfe8);
+        this.physics.add.existing(this.amiga, true); // Corpo estático (bloqueia o player)
+
+        this.amigaLabel = this.add.text(this._amigaX, this._amigaY - 45, '👧 AMIGA', {
+            fontSize: '12px', fontFamily: "'Courier New', monospace", color: '#ec4899', fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(10);
+
+        // ==========================================
+        // 🪑 MESA / OBSTÁCULO DO CENÁRIO
+        // ==========================================
+        this.mesa = this.add.rectangle(width / 2, height - 120, 140, 70, 0x334155).setDepth(10);
+        this.mesa.setStrokeStyle(2, 0x64748b);
+        this.physics.add.existing(this.mesa, true); // O 'true' torna um corpo estático (sólido)
+
+        this.mesaLabel = this.add.text(width / 2, height - 120, 'MESA', {
+            fontSize: '12px', fontFamily: "'Courier New', monospace", color: '#94a3b8'
+        }).setOrigin(0.5).setDepth(10);
+
+        // Colisões do Jogador com o Cenário e a Amiga
+        this.physics.add.collider(this.player, this.mesa);
+        this.physics.add.collider(this.player, this.amiga);
+
         // Controles do Teclado
         this.cursors = this.input.keyboard.createCursorKeys();
         this.keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
@@ -48,22 +77,17 @@ export default class Cena02 extends Phaser.Scene {
         });
 
         // ==========================================
-        // 🎒 MOCHILA DA VÍTIMA
+        // 🎒 MOCHILA DA VÍTIMA (Inicialmente apagada/escondida)
         // ==========================================
         this._mochilaX = width / 2;
-        this._mochilaY = height - 120;
+        this._mochilaY = height - 230; // Posicionada um pouco acima da mesa
 
-        this._mochilaObj = this.add.rectangle(this._mochilaX, this._mochilaY, 50, 50, 0x10b981).setDepth(10);
+        this._mochilaObj = this.add.rectangle(this._mochilaX, this._mochilaY, 50, 50, 0x10b981).setDepth(10).setAlpha(0.3);
         this._mochilaObj.setStrokeStyle(2, 0xa7f3d0);
 
         this._mochilaLabel = this.add.text(this._mochilaX, this._mochilaY - 45, '🎒 MOCHILA DA ANA', {
             fontSize: '13px', fontFamily: "'Courier New', monospace", color: '#10b981', fontStyle: 'bold'
-        }).setOrigin(0.5).setDepth(10);
-
-        this.tweens.add({
-            targets: [this._mochilaObj, this._mochilaLabel],
-            alpha: 0.5, yoyo: true, repeat: -1, duration: 800
-        });
+        }).setOrigin(0.5).setDepth(10).setAlpha(0.3);
 
         // ==========================================
         // 🚪 PORTA DE SAÍDA
@@ -79,15 +103,12 @@ export default class Cena02 extends Phaser.Scene {
         }).setOrigin(0.5).setDepth(10);
 
         // Caixa de instruções no topo
-        this._instrBg = this.add.rectangle(width / 2, 40, width - 100, 40, 0x0b1120, 0.9).setVisible(false).setDepth(100);
+        this._instrBg = this.add.rectangle(width / 2, 40, width - 100, 40, 0x0b1120, 0.9).setDepth(100);
         this._instrBg.setStrokeStyle(1, 0x334155);
 
-        this._instrText = this.add.text(width / 2, 40, '', {
+        this._instrText = this.add.text(width / 2, 40, 'Ande até a Amiga para interrogá-la', {
             fontSize: '14px', fontFamily: "'Courier New', monospace", color: '#ffffff'
-        }).setOrigin(0.5).setVisible(false).setDepth(101);
-
-        // Inicia com o diálogo
-        this._criarDialogo();
+        }).setOrigin(0.5).setDepth(101);
     }
 
     update() {
@@ -103,11 +124,12 @@ export default class Cena02 extends Phaser.Scene {
             }
         }
 
-        // 🚶 LÓGICA DE MOVIMENTAÇÃO DO PERSONAGEM
-        if (this._fase === 'exploracao_mochila' || this._fase === 'saida') {
+        // 🚶 LÓGICA DE MOVIMENTAÇÃO E INTERAÇÃO
+        if (this._fase === 'falar_amiga' || this._fase === 'exploracao_mochila' || this._fase === 'saida') {
             const speed = 220;
             this.player.body.setVelocity(0);
 
+            // Controles WASD / Setas
             if (this.cursors.left.isDown || this.wasd.left.isDown) {
                 this.player.body.setVelocityX(-speed);
             } else if (this.cursors.right.isDown || this.wasd.right.isDown) {
@@ -120,7 +142,24 @@ export default class Cena02 extends Phaser.Scene {
                 this.player.body.setVelocityY(speed);
             }
 
-            // Checa aproximação da mochila
+            // 1️⃣ FASE: INTERAGIR COM A AMIGA
+            if (this._fase === 'falar_amiga') {
+                const distAmiga = Phaser.Math.Distance.Between(this.player.x, this.player.y, this._amigaX, this._amigaY);
+                
+                if (distAmiga < 80) {
+                    this._instrText.setText('Aperte [ESPAÇO] ou [E] para falar com a Amiga');
+                    this._instrText.setColor('#ec4899');
+
+                    if (Phaser.Input.Keyboard.JustDown(this.keyE) || Phaser.Input.Keyboard.JustDown(this.keySpace)) {
+                        this._iniciarDialogoAmiga();
+                    }
+                } else {
+                    this._instrText.setText('Ande até a Amiga para interrogá-la');
+                    this._instrText.setColor('#ffffff');
+                }
+            }
+
+            // 2️⃣ FASE: INTERAGIR COM A MOCHILA
             if (this._fase === 'exploracao_mochila') {
                 const distMochila = Phaser.Math.Distance.Between(this.player.x, this.player.y, this._mochilaX, this._mochilaY);
                 
@@ -132,12 +171,12 @@ export default class Cena02 extends Phaser.Scene {
                         this._abrirBilhete();
                     }
                 } else {
-                    this._instrText.setText('Ande até a mochila verde com as SETAS / WASD');
+                    this._instrText.setText('Ande até a mochila verde na mesa');
                     this._instrText.setColor('#ffffff');
                 }
             }
 
-            // Checa aproximação da porta
+            // 3️⃣ FASE: IR PARA A PORTA
             if (this._fase === 'saida') {
                 const distPorta = Phaser.Math.Distance.Between(this.player.x, this.player.y, this._portaX, this._portaY);
                 
@@ -159,6 +198,11 @@ export default class Cena02 extends Phaser.Scene {
     // =======================================================
     // MÉTODOS DO DIÁLOGO
     // =======================================================
+
+    _iniciarDialogoAmiga() {
+        this.player.body.setVelocity(0);
+        this._criarDialogo();
+    }
 
     _criarDialogo() {
         const { width, height } = this.scale;
@@ -258,6 +302,14 @@ export default class Cena02 extends Phaser.Scene {
             this.input.off('pointerdown', this._dialogoClickHandler);
         }
 
+        // Libera a Mochila e faz ela brilhar
+        this._mochilaObj.setAlpha(1);
+        this._mochilaLabel.setAlpha(1);
+        this.tweens.add({
+            targets: [this._mochilaObj, this._mochilaLabel],
+            alpha: 0.5, yoyo: true, repeat: -1, duration: 800
+        });
+
         this.tweens.add({
             targets: this._dialogoGrupo,
             alpha: 0, duration: 400,
@@ -274,11 +326,6 @@ export default class Cena02 extends Phaser.Scene {
     // =======================================================
 
     _liberarInteracaoMochila() {
-        if (this._instrBg && this._instrText) {
-            this._instrBg.setVisible(true).setAlpha(1);
-            this._instrText.setVisible(true).setAlpha(1);
-        }
-
         this._mochilaObj.setInteractive({ useHandCursor: true });
         this._mochilaObj.on('pointerdown', () => this._abrirBilhete());
     }
