@@ -24,20 +24,19 @@ export default class Cena02 extends Phaser.Scene {
         this.add.rectangle(width / 2, height / 2, width, height, 0x0f172a).setDepth(0);
 
         // ==========================================
-        // 🕵️ PERSONAGEM PRINCIPAL (Visível e com física)
+        // 🕵️ PERSONAGEM PRINCIPAL (Com visibilidade e física)
         // ==========================================
         this.player = this.add.rectangle(120, height - 120, 40, 60, 0x6366f1);
-        this.player.setStrokeStyle(2, 0xffffff); // Borda branca para destacar
+        this.player.setStrokeStyle(2, 0xffffff); // Borda branca para destacar no escuro
         this.player.setDepth(20);
         this.physics.add.existing(this.player);
         this.player.body.setCollideWorldBounds(true);
 
-        // Rótulo sobre o jogador
         this.playerLabel = this.add.text(120, height - 160, '🕵️ DETETIVE', {
             fontSize: '12px', fontFamily: "'Courier New', monospace", color: '#ffffff', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(20);
 
-        // Teclado (Setas e Teclas de Ação)
+        // Controles do Teclado
         this.cursors = this.input.keyboard.createCursorKeys();
         this.keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
         this.keySpace = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -61,7 +60,6 @@ export default class Cena02 extends Phaser.Scene {
             fontSize: '13px', fontFamily: "'Courier New', monospace", color: '#10b981', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(10);
 
-        // Efeito brilhante na mochila
         this.tweens.add({
             targets: [this._mochilaObj, this._mochilaLabel],
             alpha: 0.5, yoyo: true, repeat: -1, duration: 800
@@ -88,36 +86,35 @@ export default class Cena02 extends Phaser.Scene {
             fontSize: '14px', fontFamily: "'Courier New', monospace", color: '#ffffff'
         }).setOrigin(0.5).setVisible(false).setDepth(101);
 
-        // Inicia com a conversa da amiga
+        // Inicia com o diálogo
         this._criarDialogo();
     }
 
     update() {
-        // Atualiza a posição do rótulo do boneco
+        // Acompanha a posição do texto do nome do detetive
         if (this.player && this.playerLabel) {
             this.playerLabel.setPosition(this.player.x, this.player.y - 45);
         }
 
-        // 🚶 CONTROLE DE MOVIMENTAÇÃO DO PERSONAGEM
+        // 🚶 LÓGICA DE MOVIMENTAÇÃO DO PERSONAGEM
         if (this._fase === 'exploracao_mochila' || this._fase === 'saida') {
             const speed = 220;
             this.player.body.setVelocity(0);
 
-            // Esquerda / Direita
+            // Controles de direção (Setas ou WASD)
             if (this.cursors.left.isDown || this.wasd.left.isDown) {
                 this.player.body.setVelocityX(-speed);
             } else if (this.cursors.right.isDown || this.wasd.right.isDown) {
                 this.player.body.setVelocityX(speed);
             }
 
-            // Cima / Baixo
             if (this.cursors.up.isDown || this.wasd.up.isDown) {
                 this.player.body.setVelocityY(-speed);
             } else if (this.cursors.down.isDown || this.wasd.down.isDown) {
                 this.player.body.setVelocityY(speed);
             }
 
-            // 🎒 Checa proximidade com a mochila
+            // Checa aproximação da mochila
             if (this._fase === 'exploracao_mochila') {
                 const distMochila = Phaser.Math.Distance.Between(this.player.x, this.player.y, this._mochilaX, this._mochilaY);
                 
@@ -129,24 +126,24 @@ export default class Cena02 extends Phaser.Scene {
                         this._abrirBilhete();
                     }
                 } else {
-                    this._instrText.setText('Ande com as SETAS / WASD até a mochila verde');
+                    this._instrText.setText('Ande até a mochila verde com as SETAS / WASD');
                     this._instrText.setColor('#ffffff');
                 }
             }
 
-            // 🚪 Checa proximidade com a porta de saída
+            // Checa aproximação da porta
             if (this._fase === 'saida') {
                 const distPorta = Phaser.Math.Distance.Between(this.player.x, this.player.y, this._portaX, this._portaY);
                 
                 if (distPorta < 70) {
-                    this._instrText.setText('Aperte [ESPAÇO] ou [E] para sair para o Mapa');
+                    this._instrText.setText('Aperte [ESPAÇO] ou [E] para ir ao Mapa');
                     this._instrText.setColor('#fbbf24');
 
                     if (Phaser.Input.Keyboard.JustDown(this.keyE) || Phaser.Input.Keyboard.JustDown(this.keySpace)) {
                         this._sairCasa();
                     }
                 } else {
-                    this._instrText.setText('Dirija-se até a porta de saída');
+                    this._instrText.setText('Ande até a porta de saída');
                     this._instrText.setColor('#fbbf24');
                 }
             }
@@ -267,7 +264,7 @@ export default class Cena02 extends Phaser.Scene {
     }
 
     // =======================================================
-    // 🔍 MOCHILA E BILHETE COM WORD WRAP CORRIGIDO
+    // 🔍 INTERAÇÃO COM A MOCHILA E LEITURA DO BILHETE
     // =======================================================
 
     _liberarInteracaoMochila() {
@@ -276,7 +273,6 @@ export default class Cena02 extends Phaser.Scene {
             this._instrText.setVisible(true).setAlpha(1);
         }
 
-        // Permite clicar na mochila também se quiser
         this._mochilaObj.setInteractive({ useHandCursor: true });
         this._mochilaObj.on('pointerdown', () => this._abrirBilhete());
     }
@@ -285,34 +281,30 @@ export default class Cena02 extends Phaser.Scene {
         if (this._mochilaInvestigada || this._fase === 'lendo_bilhete') return;
         this._fase = 'lendo_bilhete';
 
-        // Para o movimento do boneco durante a leitura
         if (this.player && this.player.body) this.player.body.setVelocity(0);
 
         const { width, height } = this.scale;
         this._bilheteGrupo = [];
 
-        // Fundo escuro
         const bgOverlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.75).setDepth(250);
         this._bilheteGrupo.push(bgOverlay);
 
-        // Papel do bilhete (Aumentado de tamanho para respirar melhor)
         const papel = this.add.rectangle(width / 2, height / 2, 600, 380, 0xfef3c7).setDepth(251);
         papel.setStrokeStyle(3, 0xd97706);
         this._bilheteGrupo.push(papel);
 
-        // Título do Bilhete
         const titulo = this.add.text(width / 2, height / 2 - 140, '📜 BILHETE ENCONTRADO NA MOCHILA', {
             fontSize: '16px', fontFamily: "'Courier New', monospace", color: '#b45309', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(252);
         this._bilheteGrupo.push(titulo);
 
-        // Conteúdo com WordWrap ativado para NÃO VAZAR as bordas
         const textoBilhete = 
-            '"Não aguento mais a pressão e as ameaças... Preciso sair da cidade.\n\n' +
+            '"Não agumento mais a pressão e as ameaças... Preciso sair da cidade.\n\n' +
             'Vou me encontrar com alguém na lanchonete hoje à noite para tentar ' +
             'resolver isso de uma vez por todas. Se algo me acontecer, ' +
             'procurem por quem estava me seguindo."';
 
+        // WordWrap garante que o texto não vaze a folha amarela
         const conteudo = this.add.text(width / 2, height / 2 - 10, textoBilhete, {
             fontSize: '15px',
             fontFamily: "'Courier New', monospace",
@@ -320,11 +312,10 @@ export default class Cena02 extends Phaser.Scene {
             align: 'center',
             lineSpacing: 8,
             fontStyle: 'italic',
-            wordWrap: { width: 500 } // Limita a largura do texto ao tamanho do papel
+            wordWrap: { width: 500 }
         }).setOrigin(0.5).setDepth(252);
         this._bilheteGrupo.push(conteudo);
 
-        // Botão Guardar Pista
         const btnGuardar = this.add.rectangle(width / 2, height / 2 + 130, 220, 45, 0xd97706).setDepth(252);
         btnGuardar.setInteractive({ useHandCursor: true });
         this._bilheteGrupo.push(btnGuardar);
