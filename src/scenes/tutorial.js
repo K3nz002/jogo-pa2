@@ -12,12 +12,14 @@ export class TutorialScene extends Phaser.Scene {
         this.velocidadePlayer = 260;
         this._fase = 'movimento';      // 'movimento' | 'perto_telefone' | 'dialogo' | 'missao' | 'saida' | 'transicao' | 'encerrando_dialogo' | 'saindo_missao'
         this._dialogoIndex = 0;
-        this._phoneOsc = null;         // Oscilador Web Audio do telefone
-        this._phoneGain = null;
-        this._phoneTimerEvent = null;  // Timer do Phaser substituindo o setInterval nativo
-        this._ultimaDirecao = 'baixo'; // Guarda a última direção para o frame ocioso (Idle)
         
-        // Atributos do Typewriter (Prevenção de TypeError)
+        // Atributos do Web Audio
+        this._phoneOsc = null;
+        this._phoneGain = null;
+        this._phoneTimerEvent = null;
+        this._ultimaDirecao = 'baixo';
+        
+        // Atributos do Typewriter e UI
         this._twTimer = null;
         this._twChars = [];
         this._twIndex = 0;
@@ -25,6 +27,7 @@ export class TutorialScene extends Phaser.Scene {
         this._pointerHandler = null;
         this._dialogoGrupo = [];
         this._missaoGrupo = [];
+        this._overlapPorta = null; // Guardar referência do overlap para remoção segura
     }
 
     preload() {
@@ -40,7 +43,7 @@ export class TutorialScene extends Phaser.Scene {
         this._criarAnimacoesGlobais();
         this._criarDelegacia(width, height);
         this._criarPlayer(width, height);
-        this._criarTelefone(width, height);
+        this._criarTelefone();
         this._criarPorta(width, height);
         this._criarUITutorial(width, height);
         this._configurarControles();
@@ -58,7 +61,7 @@ export class TutorialScene extends Phaser.Scene {
         // Bloqueia movimentação durante diálogos, popups e transições
         const fasesBloqueadas = ['dialogo', 'missao', 'transicao', 'encerrando_dialogo', 'saindo_missao'];
         if (fasesBloqueadas.includes(this._fase)) {
-            if (this.player && this.player.body) {
+            if (this.player && this.player.body && this.player.body.velocity.lengthSq() > 0) {
                 this.player.body.setVelocity(0);
                 this.player.anims.stop();
             }
@@ -156,44 +159,35 @@ export class TutorialScene extends Phaser.Scene {
         this.add.rectangle(1410, 100, 22, 18, 0xef4444, 0.4);
         this.add.rectangle(1440, 100, 22, 18, 0x22d3ee, 0.5);
 
-        // Planta decorativa
+        // Planta decorativa e Relógio
         this.add.text(1750, 200, '🪴', { fontSize: '32px' }).setOrigin(0.5).setDepth(3);
-
-        // Relógio
         this.add.text(850, 88, '🕐', { fontSize: '22px' }).setOrigin(0.5);
 
         // Colisão com paredes
         this._paredeTop = this.add.rectangle(w / 2, 120, w, 5, 0x000000, 0).setDepth(0);
-        this.physics.add.existing(this._paredeTop, true);
-
         this._paredeLeft = this.add.rectangle(80, h / 2, 5, h, 0x000000, 0).setDepth(0);
-        this.physics.add.existing(this._paredeLeft, true);
-
         this._paredeRight = this.add.rectangle(w - 80, h / 2, 5, h, 0x000000, 0).setDepth(0);
-        this.physics.add.existing(this._paredeRight, true);
-
         this._paredeBottom = this.add.rectangle(w / 2, h - 60, w, 5, 0x000000, 0).setDepth(0);
-        this.physics.add.existing(this._paredeBottom, true);
+
+        [this._paredeTop, this._paredeLeft, this._paredeRight, this._paredeBottom].forEach(parede => {
+            this.physics.add.existing(parede, true);
+        });
     }
 
-    _criarPlayer(w, h) {
+    _criarPlayer() {
         this.player = this.physics.add.sprite(500, 640, 'policial_sheet');
         this.player.setDepth(10);
         this.player.setScale(2);
         this.player.body.setCollideWorldBounds(true);
         this.player.body.setSize(12, 20);
         this.player.body.setOffset(1, 10);
-
         this.player.setFrame(0);
 
         this.physics.add.collider(this.player, this._mesaDetetive);
-        this.physics.add.collider(this.player, this._paredeTop);
-        this.physics.add.collider(this.player, this._paredeLeft);
-        this.physics.add.collider(this.player, this._paredeRight);
-        this.physics.add.collider(this.player, this._paredeBottom);
+        this.physics.add.collider(this.player, [this._paredeTop, this._paredeLeft, this._paredeRight, this._paredeBottom]);
     }
 
-    _criarTelefone(w, h) {
+    _criarTelefone() {
         this._telefoneX = 560;
         this._telefoneY = 500;
 
@@ -201,30 +195,22 @@ export class TutorialScene extends Phaser.Scene {
         this._telefone.setStrokeStyle(1, 0x475569);
         this._telefone.setInteractive({ useHandCursor: true });
 
-        this._telefoneIcon = this.add.text(this._telefoneX, this._telefoneY, '📞', { fontSize: '18px' })
-            .setOrigin(0.5).setDepth(7);
+        this._telefoneIcon = this.add.text(this._telefoneX, this._telefoneY, '📞', { fontSize: '18px' }).setOrigin(0.5).setDepth(7);
 
         this.tweens.add({
             targets: [this._telefone, this._telefoneIcon],
             x: this._telefoneX + 3,
-            yoyo: true,
-            repeat: -1,
-            duration: 80,
-            ease: 'Sine.easeInOut'
+            yoyo: true, repeat: -1, duration: 80, ease: 'Sine.easeInOut'
         });
 
         this._setaTelefone = this.add.text(this._telefoneX, this._telefoneY - 55, '▼', {
-            fontSize: '28px', fontFamily: "'Courier New', monospace",
-            color: '#fbbf24', fontStyle: 'bold'
+            fontSize: '28px', fontFamily: "'Courier New', monospace", color: '#fbbf24', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(20);
 
         this.tweens.add({
             targets: this._setaTelefone,
             y: this._telefoneY - 40,
-            yoyo: true,
-            repeat: -1,
-            duration: 600,
-            ease: 'Sine.easeInOut'
+            yoyo: true, repeat: -1, duration: 600, ease: 'Sine.easeInOut'
         });
 
         this._telefoneGlow = this.add.rectangle(this._telefoneX, this._telefoneY, 50, 38, 0xfbbf24, 0)
@@ -292,19 +278,24 @@ export class TutorialScene extends Phaser.Scene {
     }
 
     _processarMovimento() {
-        const vel = this.velocidadePlayer;
         let vx = 0, vy = 0;
 
-        if (this._keys.left.isDown  || this._wasd.left.isDown)  vx = -vel;
-        else if (this._keys.right.isDown || this._wasd.right.isDown) vx = vel;
+        if (this._keys.left.isDown || this._wasd.left.isDown) vx = -1;
+        else if (this._keys.right.isDown || this._wasd.right.isDown) vx = 1;
 
-        if (this._keys.up.isDown    || this._wasd.up.isDown)    vy = -vel;
-        else if (this._keys.down.isDown  || this._wasd.down.isDown)  vy = vel;
+        if (this._keys.up.isDown || this._wasd.up.isDown) vy = -1;
+        else if (this._keys.down.isDown || this._wasd.down.isDown) vy = 1;
 
-        if (vx !== 0 && vy !== 0) { vx *= 0.7071; vy *= 0.7071; }
+        // Normalização do vetor para movimento diagonal correto
+        if (vx !== 0 || vy !== 0) {
+            const mag = Math.sqrt(vx * vx + vy * vy);
+            vx = (vx / mag) * this.velocidadePlayer;
+            vy = (vy / mag) * this.velocidadePlayer;
+        }
 
         this.player.body.setVelocity(vx, vy);
 
+        // Controle de Animações
         if (vx < 0) {
             this.player.anims.play('andar_esquerda', true);
             this._ultimaDirecao = 'esquerda';
@@ -330,11 +321,12 @@ export class TutorialScene extends Phaser.Scene {
 
     _iniciarSomTelefone() {
         try {
+            // Verificação de segurança robusta para WebAudio
+            if (!this.sound || !this.sound.context) return;
             const ctx = this.sound.context;
-            if (!ctx) return;
 
             if (ctx.state === 'suspended') {
-                ctx.resume();
+                ctx.resume().catch(() => { /* Abafa o erro silenciosamente se o navegador bloquear autoplay */ });
             }
 
             this._phoneGain = ctx.createGain();
@@ -346,9 +338,11 @@ export class TutorialScene extends Phaser.Scene {
                     this._pararSomTelefone();
                     return;
                 }
+                
                 if (this._phoneOsc) {
                     try { this._phoneOsc.stop(); this._phoneOsc.disconnect(); } catch (_) {}
                 }
+                
                 this._phoneOsc = ctx.createOscillator();
                 this._phoneOsc.type = 'sine';
                 this._phoneOsc.frequency.value = 440;
@@ -372,15 +366,13 @@ export class TutorialScene extends Phaser.Scene {
                 });
             };
 
-            // Utiliza o Event Timer seguro do Phaser
             this._phoneTimerEvent = this.time.addEvent({
-                delay: 2500,
-                callback: startRing,
-                loop: true
+                delay: 2500, callback: startRing, loop: true
             });
             startRing();
+            
         } catch (e) {
-            // Silêncio caso Web Audio esteja bloqueado
+            // Falha graciosa caso o Audio Context não suporte o script acima
         }
     }
 
@@ -450,102 +442,43 @@ export class TutorialScene extends Phaser.Scene {
         const boxY = height - boxH / 2 - 10;
 
         this._roteiro = [
-            {
-                falante: 'detetive',
-                nome: 'DETETIVE',
-                texto: 'Delegacia de Ceilândia. Investigador falando.',
-                corNome: 0x6366f1,
-                retrato: '👮',
-                retratoBg: 0x1e3a5f,
-                tremido: false
-            },
-            {
-                falante: 'mae',
-                nome: 'VOZ MISTERIOSA',
-                texto: 'Por favor... me ajude! Minha filha não voltou para casa desde ontem... Estou desesperada.',
-                corNome: 0x475569,
-                retrato: '📞',
-                retratoBg: 0x0a0a0a,
-                tremido: true
-            },
-            {
-                falante: 'detetive',
-                nome: 'DETETIVE',
-                texto: 'Acalme-se, senhora. Vou registrar a ocorrência. Onde e com quem ela foi vista pela última vez?',
-                corNome: 0x6366f1,
-                retrato: '👮',
-                retratoBg: 0x1e3a5f,
-                tremido: false
-            },
-            {
-                falante: 'mae',
-                nome: 'VOZ MISTERIOSA',
-                texto: 'Ela me disse que ia passar na casa de uma amiga... Fica na Rua das Rosas, casa 12.',
-                corNome: 0x475569,
-                retrato: '📞',
-                retratoBg: 0x0a0a0a,
-                tremido: true
-            },
-            {
-                falante: 'detetive',
-                nome: 'DETETIVE',
-                texto: 'Entendido. Estou indo para lá iniciar as buscas agora mesmo.',
-                corNome: 0x6366f1,
-                retrato: '👮',
-                retratoBg: 0x1e3a5f,
-                tremido: false
-            }
+            { falante: 'detetive', nome: 'DETETIVE', texto: 'Delegacia de Ceilândia. Investigador falando.', corNome: 0x6366f1, retrato: '👮', retratoBg: 0x1e3a5f, tremido: false },
+            { falante: 'mae', nome: 'VOZ MISTERIOSA', texto: 'Por favor... me ajude! Minha filha não voltou para casa desde ontem... Estou desesperada.', corNome: 0x475569, retrato: '📞', retratoBg: 0x0a0a0a, tremido: true },
+            { falante: 'detetive', nome: 'DETETIVE', texto: 'Acalme-se, senhora. Vou registrar a ocorrência. Onde e com quem ela foi vista pela última vez?', corNome: 0x6366f1, retrato: '👮', retratoBg: 0x1e3a5f, tremido: false },
+            { falante: 'mae', nome: 'VOZ MISTERIOSA', texto: 'Ela me disse que ia passar na casa de uma amiga... Fica na Rua das Rosas, casa 12.', corNome: 0x475569, retrato: '📞', retratoBg: 0x0a0a0a, tremido: true },
+            { falante: 'detetive', nome: 'DETETIVE', texto: 'Entendido. Estou indo para lá iniciar as buscas agora mesmo.', corNome: 0x6366f1, retrato: '👮', retratoBg: 0x1e3a5f, tremido: false }
         ];
 
         this._dialogoGrupo = [];
 
         const overlay = this.add.rectangle(width / 2, (height - boxH) / 2, width, height - boxH, 0x000000, 0.4).setDepth(150);
-        this._dialogoGrupo.push(overlay);
-
-        const box = this.add.rectangle(width / 2, boxY, width - 30, boxH, 0x0b1120, 0.97).setDepth(150);
-        box.setStrokeStyle(2, 0x6366f1, 0.9);
-        this._dialogoGrupo.push(box);
-
-        this._retratoBox = this.add.rectangle(120, boxY, 130, 130, 0x1e3a5f).setDepth(151);
-        this._retratoBox.setStrokeStyle(2, 0x6366f1, 0.8);
-        this._dialogoGrupo.push(this._retratoBox);
-
-        this._retratoEmoji = this.add.text(120, boxY, '👮', { fontSize: '52px' })
-            .setOrigin(0.5).setDepth(152);
-        this._dialogoGrupo.push(this._retratoEmoji);
-
+        const box = this.add.rectangle(width / 2, boxY, width - 30, boxH, 0x0b1120, 0.97).setDepth(150).setStrokeStyle(2, 0x6366f1, 0.9);
+        this._retratoBox = this.add.rectangle(120, boxY, 130, 130, 0x1e3a5f).setDepth(151).setStrokeStyle(2, 0x6366f1, 0.8);
+        this._retratoEmoji = this.add.text(120, boxY, '👮', { fontSize: '52px' }).setOrigin(0.5).setDepth(152);
         this._silhueta = this.add.rectangle(120, boxY, 130, 130, 0x050505, 0.85).setDepth(152).setVisible(false);
-        this._dialogoGrupo.push(this._silhueta);
-
         this._nomeBadgeBg = this.add.rectangle(120, boxY - 82, 150, 32, 0x6366f1).setDepth(153);
-        this._dialogoGrupo.push(this._nomeBadgeBg);
-
+        
         this._nomeText = this.add.text(120, boxY - 82, 'DETETIVE', {
-            fontSize: '13px', fontFamily: "'Courier New', monospace",
-            color: '#ffffff', fontStyle: 'bold'
+            fontSize: '13px', fontFamily: "'Courier New', monospace", color: '#ffffff', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(154);
-        this._dialogoGrupo.push(this._nomeText);
-
+        
         this._dialogoText = this.add.text(210, boxY - 50, '', {
-            fontSize: '19px', fontFamily: "'Courier New', monospace",
-            color: '#e2e8f0', wordWrap: { width: width - 270 }, lineSpacing: 8
+            fontSize: '19px', fontFamily: "'Courier New', monospace", color: '#e2e8f0', wordWrap: { width: width - 270 }, lineSpacing: 8
         }).setOrigin(0, 0).setDepth(153);
-        this._dialogoGrupo.push(this._dialogoText);
-
+        
         this._contadorText = this.add.text(width - 40, boxY - boxH / 2 + 18, '', {
             fontSize: '13px', fontFamily: "'Courier New', monospace", color: '#475569'
         }).setOrigin(1, 0.5).setDepth(153);
-        this._dialogoGrupo.push(this._contadorText);
-
+        
         this._continuarText = this.add.text(width - 40, boxY + boxH / 2 - 22, '▶  CLIQUE  /  ESPAÇO', {
             fontSize: '13px', fontFamily: "'Courier New', monospace", color: '#6366f1'
         }).setOrigin(1, 1).setDepth(153);
         
         this.tweens.add({
-            targets: this._continuarText,
-            alpha: 0.25, yoyo: true, repeat: -1, duration: 750
+            targets: this._continuarText, alpha: 0.25, yoyo: true, repeat: -1, duration: 750
         });
-        this._dialogoGrupo.push(this._continuarText);
+
+        this._dialogoGrupo.push(overlay, box, this._retratoBox, this._retratoEmoji, this._silhueta, this._nomeBadgeBg, this._nomeText, this._dialogoText, this._contadorText, this._continuarText);
 
         this._pointerHandler = () => {
             if (this._fase === 'dialogo') this._avancarDialogo();
@@ -567,7 +500,6 @@ export class TutorialScene extends Phaser.Scene {
         this._retratoBox.setFillStyle(fala.retratoBg);
         this._nomeBadgeBg.setFillStyle(fala.corNome);
         this._nomeText.setText(fala.nome);
-
         this._silhueta.setVisible(fala.falante === 'mae');
 
         if (fala.tremido) {
@@ -607,7 +539,6 @@ export class TutorialScene extends Phaser.Scene {
     }
 
     _avancarDialogo() {
-        // Prevenção contra estouro de array/string não inicializada
         if (this._twChars && this._twIndex < this._twChars.length) {
             if (this._twTimer) {
                 this._twTimer.remove();
@@ -639,11 +570,8 @@ export class TutorialScene extends Phaser.Scene {
             targets: this._dialogoGrupo,
             alpha: 0, duration: 400,
             onComplete: () => {
-                this._dialogoGrupo.forEach(obj => {
-                    if (obj && obj.destroy) obj.destroy();
-                });
+                this._dialogoGrupo.forEach(obj => { if (obj && obj.destroy) obj.destroy(); });
                 this._dialogoGrupo = [];
-
                 this.time.delayedCall(300, () => this._mostrarPopupMissao());
             }
         });
@@ -652,62 +580,37 @@ export class TutorialScene extends Phaser.Scene {
     _mostrarPopupMissao() {
         this._fase = 'missao';
         const { width, height } = this.scale;
-
-        this._missaoOverlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.6).setDepth(200);
-        this._missaoOverlay.setAlpha(0);
-
-        const popW = 600;
-        const popH = 320;
-        const popX = width / 2;
-        const popY = height / 2;
-
+        
+        this._missaoOverlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.6).setDepth(200).setAlpha(0);
+        
+        const popW = 600, popH = 320, popX = width / 2, popY = height / 2;
         this._missaoGrupo = [];
 
-        const popBg = this.add.rectangle(popX, popY, popW, popH, 0x0b1120, 0.98).setDepth(201);
-        popBg.setStrokeStyle(2, 0x6366f1, 0.9);
-        this._missaoGrupo.push(popBg);
-
+        const popBg = this.add.rectangle(popX, popY, popW, popH, 0x0b1120, 0.98).setDepth(201).setStrokeStyle(2, 0x6366f1, 0.9);
         const linhaTop = this.add.rectangle(popX, popY - popH / 2 + 50, popW - 40, 2, 0x6366f1, 0.4).setDepth(202);
-        this._missaoGrupo.push(linhaTop);
-
         const icone = this.add.text(popX, popY - 100, '🔍', { fontSize: '42px' }).setOrigin(0.5).setDepth(202);
-        this._missaoGrupo.push(icone);
-
+        
         const titulo = this.add.text(popX, popY - 50, 'NOVO CASO: DESAPARECIMENTO', {
-            fontSize: '24px', fontFamily: "'Courier New', monospace",
-            color: '#f8fafc', fontStyle: 'bold', letterSpacing: 3
+            fontSize: '24px', fontFamily: "'Courier New', monospace", color: '#f8fafc', fontStyle: 'bold', letterSpacing: 3
         }).setOrigin(0.5).setDepth(202);
-        this._missaoGrupo.push(titulo);
-
+        
         const sep = this.add.rectangle(popX, popY - 20, 200, 1, 0x334155).setDepth(202);
-        this._missaoGrupo.push(sep);
-
+        
         const descricao = this.add.text(popX, popY + 15, '📌  Pista 1: Rua das Rosas, casa 12', {
-            fontSize: '18px', fontFamily: "'Courier New', monospace",
-            color: '#fbbf24', align: 'center'
+            fontSize: '18px', fontFamily: "'Courier New', monospace", color: '#fbbf24', align: 'center'
         }).setOrigin(0.5).setDepth(202);
-        this._missaoGrupo.push(descricao);
-
+        
         const subdesc = this.add.text(popX, popY + 50, 'Uma mãe desesperada precisa de ajuda.\nEncontre sua filha desaparecida.', {
-            fontSize: '15px', fontFamily: "'Courier New', monospace",
-            color: '#94a3b8', align: 'center', lineSpacing: 5
+            fontSize: '15px', fontFamily: "'Courier New', monospace", color: '#94a3b8', align: 'center', lineSpacing: 5
         }).setOrigin(0.5).setDepth(202);
-        this._missaoGrupo.push(subdesc);
 
-        const btnBg = this.add.rectangle(popX, popY + 115, 220, 55, 0x6366f1).setDepth(203);
-        btnBg.setInteractive({ useHandCursor: true });
-        this._missaoGrupo.push(btnBg);
-
+        const btnBg = this.add.rectangle(popX, popY + 115, 220, 55, 0x6366f1).setDepth(203).setInteractive({ useHandCursor: true });
+        
         const btnText = this.add.text(popX, popY + 115, '▶  VAMOS', {
-            fontSize: '20px', fontFamily: "'Courier New', monospace",
-            color: '#ffffff', fontStyle: 'bold'
+            fontSize: '20px', fontFamily: "'Courier New', monospace", color: '#ffffff', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(204);
-        this._missaoGrupo.push(btnText);
 
-        this.tweens.add({
-            targets: btnText, alpha: 0.65, yoyo: true, repeat: -1,
-            duration: 1000, ease: 'Sine.easeInOut', delay: 600
-        });
+        this.tweens.add({ targets: btnText, alpha: 0.65, yoyo: true, repeat: -1, duration: 1000, ease: 'Sine.easeInOut', delay: 600 });
 
         btnBg.on('pointerover', () => {
             this.tweens.add({ targets: [btnBg, btnText], scaleX: 1.05, scaleY: 1.05, duration: 120 });
@@ -717,18 +620,13 @@ export class TutorialScene extends Phaser.Scene {
             this.tweens.add({ targets: [btnBg, btnText], scaleX: 1, scaleY: 1, duration: 120 });
             btnBg.setFillStyle(0x6366f1);
         });
-
         btnBg.on('pointerdown', () => this._aoClicarVamos());
 
+        this._missaoGrupo.push(popBg, linhaTop, icone, titulo, sep, descricao, subdesc, btnBg, btnText);
         this._missaoGrupo.forEach(obj => obj.setAlpha(0));
-        this.tweens.add({
-            targets: this._missaoOverlay,
-            alpha: 1, duration: 400
-        });
-        this.tweens.add({
-            targets: this._missaoGrupo,
-            alpha: 1, duration: 500, delay: 200, ease: 'Power2'
-        });
+
+        this.tweens.add({ targets: this._missaoOverlay, alpha: 1, duration: 400 });
+        this.tweens.add({ targets: this._missaoGrupo, alpha: 1, duration: 500, delay: 200, ease: 'Power2' });
     }
 
     _aoClicarVamos() {
@@ -737,16 +635,13 @@ export class TutorialScene extends Phaser.Scene {
 
         this._missaoGrupo.forEach(obj => {
             this.tweens.killTweensOf(obj);
-            if (obj && obj.input) obj.disableInteractive();
-        });
-        if (this._missaoOverlay) this.tweens.killTweensOf(this._missaoOverlay);
-
-        this._missaoGrupo.forEach(obj => {
+            if (obj && obj.disableInteractive) obj.disableInteractive();
             if (obj && obj.destroy) obj.destroy();
         });
         this._missaoGrupo = [];
         
         if (this._missaoOverlay) {
+            this.tweens.killTweensOf(this._missaoOverlay);
             this._missaoOverlay.destroy();
             this._missaoOverlay = null;
         }
@@ -764,14 +659,12 @@ export class TutorialScene extends Phaser.Scene {
         });
 
         this._portaSeta = this.add.text(this._portaX, this._portaY - 90, '▼', {
-            fontSize: '28px', fontFamily: "'Courier New', monospace",
-            color: '#fbbf24', fontStyle: 'bold'
+            fontSize: '28px', fontFamily: "'Courier New', monospace", color: '#fbbf24', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(20);
 
         this.tweens.add({
             targets: this._portaSeta,
-            y: this._portaY - 75,
-            yoyo: true, repeat: -1, duration: 600, ease: 'Sine.easeInOut'
+            y: this._portaY - 75, yoyo: true, repeat: -1, duration: 600, ease: 'Sine.easeInOut'
         });
 
         this._portaLabel.setAlpha(1);
@@ -780,20 +673,24 @@ export class TutorialScene extends Phaser.Scene {
         const { width, height } = this.scale;
         this._saidaText = this.add.text(width / 2, height - 110,
             'Dirija-se à porta de saída para iniciar a investigação', {
-                fontSize: '17px', fontFamily: "'Courier New', monospace",
-                color: '#fbbf24', align: 'center',
+                fontSize: '17px', fontFamily: "'Courier New', monospace", color: '#fbbf24', align: 'center',
                 backgroundColor: '#050c18dd', padding: { x: 15, y: 8 }
             }).setOrigin(0.5).setDepth(100);
 
         this._porta.setInteractive({ useHandCursor: true });
         this._porta.on('pointerdown', () => this._sairDelegacia());
 
-        this.physics.add.overlap(this.player, this._portaZona, () => this._sairDelegacia());
+        this._overlapPorta = this.physics.add.overlap(this.player, this._portaZona, () => this._sairDelegacia());
     }
 
     _sairDelegacia() {
         if (this._fase !== 'saida') return;
         this._fase = 'transicao';
+
+        // Previne chamadas múltiplas de colisão da zona da porta
+        if (this._overlapPorta) {
+            this._overlapPorta.destroy();
+        }
 
         GameState.flags.tutorial_completo = true;
         GameState.flags.objetivo_atual = 'ir_para_rua_das_rosas';
