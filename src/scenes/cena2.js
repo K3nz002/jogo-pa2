@@ -21,72 +21,136 @@ export default class Cena02 extends Phaser.Scene {
         this._mochilaInvestigada = false;
 
         // Fundo básico
-        this.add.rectangle(width / 2, height / 2, width, height, 0x0f172a);
-
-        // Personagem principal
-        this.player = this.add.rectangle(120, height - 120, 40, 60, 0x6366f1);
-        this.physics.add.existing(this.player);
+        this.add.rectangle(width / 2, height / 2, width, height, 0x0f172a).setDepth(0);
 
         // ==========================================
-        // 🎒 MOCHILA DA VÍTIMA (NOVO OBJETO)
+        // 🕵️ PERSONAGEM PRINCIPAL (Visível e com física)
+        // ==========================================
+        this.player = this.add.rectangle(120, height - 120, 40, 60, 0x6366f1);
+        this.player.setStrokeStyle(2, 0xffffff); // Borda branca para destacar
+        this.player.setDepth(20);
+        this.physics.add.existing(this.player);
+        this.player.body.setCollideWorldBounds(true);
+
+        // Rótulo sobre o jogador
+        this.playerLabel = this.add.text(120, height - 160, '🕵️ DETETIVE', {
+            fontSize: '12px', fontFamily: "'Courier New', monospace", color: '#ffffff', fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(20);
+
+        // Teclado (Setas e Teclas de Ação)
+        this.cursors = this.input.keyboard.createCursorKeys();
+        this.keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+        this.keySpace = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        this.wasd = this.input.keyboard.addKeys({
+            up: Phaser.Input.Keyboard.KeyCodes.W,
+            left: Phaser.Input.Keyboard.KeyCodes.A,
+            down: Phaser.Input.Keyboard.KeyCodes.S,
+            right: Phaser.Input.Keyboard.KeyCodes.D
+        });
+
+        // ==========================================
+        // 🎒 MOCHILA DA VÍTIMA
         // ==========================================
         this._mochilaX = width / 2;
         this._mochilaY = height - 120;
 
-        // Bloco/Ícone representativo da mochila
-        this._mochilaObj = this.add.rectangle(this._mochilaX, this._mochilaY, 50, 50, 0x10b981);
-        this._mochilaLabel = this.add.text(this._mochilaX, this._mochilaY - 45, '🎒 MOCHILA DA ANA', {
-            fontSize: '13px',
-            fontFamily: "'Courier New', monospace",
-            color: '#10b981',
-            fontStyle: 'bold'
-        }).setOrigin(0.5);
+        this._mochilaObj = this.add.rectangle(this._mochilaX, this._mochilaY, 50, 50, 0x10b981).setDepth(10);
+        this._mochilaObj.setStrokeStyle(2, 0xa7f3d0);
 
-        this._mochilaZona = this.add.zone(this._mochilaX, this._mochilaY, 70, 70);
-        this.physics.add.existing(this._mochilaZona, true);
+        this._mochilaLabel = this.add.text(this._mochilaX, this._mochilaY - 45, '🎒 MOCHILA DA ANA', {
+            fontSize: '13px', fontFamily: "'Courier New', monospace", color: '#10b981', fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(10);
 
         // Efeito brilhante na mochila
         this.tweens.add({
             targets: [this._mochilaObj, this._mochilaLabel],
-            alpha: 0.5,
-            yoyo: true,
-            repeat: -1,
-            duration: 800
+            alpha: 0.5, yoyo: true, repeat: -1, duration: 800
         });
 
-        // Configuração da Porta de Saída (Inicialmente inativa)
+        // ==========================================
+        // 🚪 PORTA DE SAÍDA
+        // ==========================================
         this._portaX = width - 80;
-        this._portaY = height / 2;
+        this._portaY = height - 120;
 
-        this._porta = this.add.rectangle(this._portaX, this._portaY, 60, 140, 0x1e293b);
-        this._portaHighlight = this.add.rectangle(this._portaX, this._portaY, 66, 146).setStrokeStyle(2, 0x334155, 0.5);
+        this._porta = this.add.rectangle(this._portaX, this._portaY, 60, 120, 0x1e293b).setDepth(10);
+        this._portaHighlight = this.add.rectangle(this._portaX, this._portaY, 66, 126).setStrokeStyle(2, 0x334155, 0.5).setDepth(10);
 
-        this._portaLabel = this.add.text(this._portaX, this._portaY - 90, 'SAÍDA', {
-            fontSize: '14px',
-            fontFamily: "'Courier New', monospace",
-            color: '#64748b',
-            fontStyle: 'bold'
-        }).setOrigin(0.5);
+        this._portaLabel = this.add.text(this._portaX, this._portaY - 80, 'SAÍDA', {
+            fontSize: '14px', fontFamily: "'Courier New', monospace", color: '#64748b', fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(10);
 
-        this._portaZona = this.add.zone(this._portaX, this._portaY, 80, 140);
-        this.physics.add.existing(this._portaZona, true);
-
-        // Caixa de instruções da tela (topo)
-        this._instrBg = this.add.rectangle(width / 2, 40, width - 100, 40, 0x0b1120, 0.9).setVisible(false);
+        // Caixa de instruções no topo
+        this._instrBg = this.add.rectangle(width / 2, 40, width - 100, 40, 0x0b1120, 0.9).setVisible(false).setDepth(100);
         this._instrBg.setStrokeStyle(1, 0x334155);
 
         this._instrText = this.add.text(width / 2, 40, '', {
-            fontSize: '14px',
-            fontFamily: "'Courier New', monospace",
-            color: '#ffffff'
-        }).setOrigin(0.5).setVisible(false);
+            fontSize: '14px', fontFamily: "'Courier New', monospace", color: '#ffffff'
+        }).setOrigin(0.5).setVisible(false).setDepth(101);
 
-        // Inicia o diálogo com a amiga
+        // Inicia com a conversa da amiga
         this._criarDialogo();
     }
 
     update() {
-        // Lógica de atualização se necessária
+        // Atualiza a posição do rótulo do boneco
+        if (this.player && this.playerLabel) {
+            this.playerLabel.setPosition(this.player.x, this.player.y - 45);
+        }
+
+        // 🚶 CONTROLE DE MOVIMENTAÇÃO DO PERSONAGEM
+        if (this._fase === 'exploracao_mochila' || this._fase === 'saida') {
+            const speed = 220;
+            this.player.body.setVelocity(0);
+
+            // Esquerda / Direita
+            if (this.cursors.left.isDown || this.wasd.left.isDown) {
+                this.player.body.setVelocityX(-speed);
+            } else if (this.cursors.right.isDown || this.wasd.right.isDown) {
+                this.player.body.setVelocityX(speed);
+            }
+
+            // Cima / Baixo
+            if (this.cursors.up.isDown || this.wasd.up.isDown) {
+                this.player.body.setVelocityY(-speed);
+            } else if (this.cursors.down.isDown || this.wasd.down.isDown) {
+                this.player.body.setVelocityY(speed);
+            }
+
+            // 🎒 Checa proximidade com a mochila
+            if (this._fase === 'exploracao_mochila') {
+                const distMochila = Phaser.Math.Distance.Between(this.player.x, this.player.y, this._mochilaX, this._mochilaY);
+                
+                if (distMochila < 70) {
+                    this._instrText.setText('Aperte [ESPAÇO] ou [E] para examinar a mochila');
+                    this._instrText.setColor('#10b981');
+
+                    if (Phaser.Input.Keyboard.JustDown(this.keyE) || Phaser.Input.Keyboard.JustDown(this.keySpace)) {
+                        this._abrirBilhete();
+                    }
+                } else {
+                    this._instrText.setText('Ande com as SETAS / WASD até a mochila verde');
+                    this._instrText.setColor('#ffffff');
+                }
+            }
+
+            // 🚪 Checa proximidade com a porta de saída
+            if (this._fase === 'saida') {
+                const distPorta = Phaser.Math.Distance.Between(this.player.x, this.player.y, this._portaX, this._portaY);
+                
+                if (distPorta < 70) {
+                    this._instrText.setText('Aperte [ESPAÇO] ou [E] para sair para o Mapa');
+                    this._instrText.setColor('#fbbf24');
+
+                    if (Phaser.Input.Keyboard.JustDown(this.keyE) || Phaser.Input.Keyboard.JustDown(this.keySpace)) {
+                        this._sairCasa();
+                    }
+                } else {
+                    this._instrText.setText('Dirija-se até a porta de saída');
+                    this._instrText.setColor('#fbbf24');
+                }
+            }
+        }
     }
 
     // =======================================================
@@ -104,9 +168,7 @@ export default class Cena02 extends Phaser.Scene {
         this._roteiro = DIALOGO_CENA02.map(d => ({
             falante: d.ator === 'Policial' ? 'policial' : 'amiga',
             nome: d.ator === 'Policial' ? 'DETETIVE' : 'AMIGA',
-            texto: d.fala,
-            corNome: d.ator === 'Policial' ? 0x6366f1 : 0xa855f7,
-            italico: d.ator === 'Amiga'
+            texto: d.fala
         }));
 
         this._dialogoGrupo = [];
@@ -118,13 +180,11 @@ export default class Cena02 extends Phaser.Scene {
         box.setStrokeStyle(2, 0x6366f1, 0.9);
         this._dialogoGrupo.push(box);
 
-        // Retrato Esquerdo (Detetive)
         this._retratoBoxEsq = this.add.rectangle(120, boxY, 130, 130, 0x1e3a5f).setDepth(151);
         this._dialogoGrupo.push(this._retratoBoxEsq);
         this._retratoEmojiEsq = this.add.text(120, boxY, '👮', { fontSize: '52px' }).setOrigin(0.5).setDepth(152);
         this._dialogoGrupo.push(this._retratoEmojiEsq);
 
-        // Retrato Direito (Amiga)
         this._retratoBoxDir = this.add.rectangle(width - 120, boxY, 130, 130, 0x2d1a3a).setDepth(151);
         this._dialogoGrupo.push(this._retratoBoxDir);
         this._retratoEmojiDir = this.add.text(width - 120, boxY, '😢', { fontSize: '52px' }).setOrigin(0.5).setDepth(152);
@@ -207,28 +267,26 @@ export default class Cena02 extends Phaser.Scene {
     }
 
     // =======================================================
-    // 🔍 INTERAÇÃO COM A MOCHILA E LEITURA DO BILHETE
+    // 🔍 MOCHILA E BILHETE COM WORD WRAP CORRIGIDO
     // =======================================================
 
     _liberarInteracaoMochila() {
         if (this._instrBg && this._instrText) {
             this._instrBg.setVisible(true).setAlpha(1);
             this._instrText.setVisible(true).setAlpha(1);
-            this._instrText.setText('Examine a mochila verde da vítima no centro da sala');
-            this._instrText.setColor('#10b981');
         }
 
-        // Permite clicar na mochila
+        // Permite clicar na mochila também se quiser
         this._mochilaObj.setInteractive({ useHandCursor: true });
         this._mochilaObj.on('pointerdown', () => this._abrirBilhete());
-
-        // Ou andar até ela
-        this.physics.add.overlap(this.player, this._mochilaZona, () => this._abrirBilhete());
     }
 
     _abrirBilhete() {
         if (this._mochilaInvestigada || this._fase === 'lendo_bilhete') return;
         this._fase = 'lendo_bilhete';
+
+        // Para o movimento do boneco durante a leitura
+        if (this.player && this.player.body) this.player.body.setVelocity(0);
 
         const { width, height } = this.scale;
         this._bilheteGrupo = [];
@@ -237,36 +295,41 @@ export default class Cena02 extends Phaser.Scene {
         const bgOverlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.75).setDepth(250);
         this._bilheteGrupo.push(bgOverlay);
 
-        // Papel do bilhete
-        const papel = this.add.rectangle(width / 2, height / 2, 550, 350, 0xfef3c7).setDepth(251);
+        // Papel do bilhete (Aumentado de tamanho para respirar melhor)
+        const papel = this.add.rectangle(width / 2, height / 2, 600, 380, 0xfef3c7).setDepth(251);
         papel.setStrokeStyle(3, 0xd97706);
         this._bilheteGrupo.push(papel);
 
         // Título do Bilhete
-        const titulo = this.add.text(width / 2, height / 2 - 130, '📜 BILHETE ENCONTRADO NA MOCHILA', {
+        const titulo = this.add.text(width / 2, height / 2 - 140, '📜 BILHETE ENCONTRADO NA MOCHILA', {
             fontSize: '16px', fontFamily: "'Courier New', monospace", color: '#b45309', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(252);
         this._bilheteGrupo.push(titulo);
 
-        // Texto de Desabafo da Vítima
+        // Conteúdo com WordWrap ativado para NÃO VAZAR as bordas
         const textoBilhete = 
-            '"Não aguento mais a pressão e as ameaças... Preciso sair da cidade.\n' +
-            'Vou me encontrar com alguém na lanchonete hoje à noite para tentar\n' +
-            'resolver isso de uma vez por todas. Se algo me acontecer,\n' +
+            '"Não aguento mais a pressão e as ameaças... Preciso sair da cidade.\n\n' +
+            'Vou me encontrar com alguém na lanchonete hoje à noite para tentar ' +
+            'resolver isso de uma vez por todas. Se algo me acontecer, ' +
             'procurem por quem estava me seguindo."';
 
-        const conteudo = this.add.text(width / 2, height / 2 - 20, textoBilhete, {
-            fontSize: '15px', fontFamily: "'Courier New', monospace", color: '#1e293b',
-            align: 'center', lineSpacing: 10, fontStyle: 'italic'
+        const conteudo = this.add.text(width / 2, height / 2 - 10, textoBilhete, {
+            fontSize: '15px',
+            fontFamily: "'Courier New', monospace",
+            color: '#1e293b',
+            align: 'center',
+            lineSpacing: 8,
+            fontStyle: 'italic',
+            wordWrap: { width: 500 } // Limita a largura do texto ao tamanho do papel
         }).setOrigin(0.5).setDepth(252);
         this._bilheteGrupo.push(conteudo);
 
-        // Botão Fechar / Guardar Pista
-        const btnGuardar = this.add.rectangle(width / 2, height / 2 + 120, 200, 45, 0xd97706).setDepth(252);
+        // Botão Guardar Pista
+        const btnGuardar = this.add.rectangle(width / 2, height / 2 + 130, 220, 45, 0xd97706).setDepth(252);
         btnGuardar.setInteractive({ useHandCursor: true });
         this._bilheteGrupo.push(btnGuardar);
 
-        const btnText = this.add.text(width / 2, height / 2 + 120, 'GUARDAR PISTA', {
+        const btnText = this.add.text(width / 2, height / 2 + 130, 'GUARDAR PISTA', {
             fontSize: '15px', fontFamily: "'Courier New', monospace", color: '#ffffff', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(253);
         this._bilheteGrupo.push(btnText);
@@ -277,23 +340,20 @@ export default class Cena02 extends Phaser.Scene {
     _fecharBilhete() {
         this._mochilaInvestigada = true;
 
-        // Salva as informações da pista no GameState
         GameState.anotarPista('bilhete_desabafo_vitima');
         GameState.registrarAnotacaoInterrogatorio(
             'amiga', 'Mochila da Ana', GameState.diaAtual,
             'Bilhete de desabafo encontrado: Ana relatou ameaças e um encontro marcado na lanchonete.'
         );
 
-        // Destrói a tela do bilhete
         this._bilheteGrupo.forEach(o => o.destroy());
         this._bilheteGrupo = [];
 
-        // Exibe o popup oficial da nova missão
         this._mostrarPopupMissao();
     }
 
     // =======================================================
-    // MÉTODOS DO POPUP DE MISSÃO
+    // POPUP DE MISSÃO E SAÍDA
     // =======================================================
 
     _mostrarPopupMissao() {
@@ -302,14 +362,11 @@ export default class Cena02 extends Phaser.Scene {
 
         this._missaoOverlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.6).setDepth(200);
 
-        const popW = 620;
-        const popH = 340;
         const cx = width / 2;
         const cy = height / 2;
-
         this._missaoGrupo = [];
 
-        const popBg = this.add.rectangle(cx, cy, popW, popH, 0x0b1120, 0.98).setDepth(201);
+        const popBg = this.add.rectangle(cx, cy, 620, 340, 0x0b1120, 0.98).setDepth(201);
         popBg.setStrokeStyle(2, 0x6366f1, 0.9);
         this._missaoGrupo.push(popBg);
 
@@ -335,7 +392,7 @@ export default class Cena02 extends Phaser.Scene {
         btnBg.setInteractive({ useHandCursor: true });
         this._missaoGrupo.push(btnBg);
 
-        const btnText = this.add.text(cx, cy + 120, '▶  IR PARA MAPA', {
+        const btnText = this.add.text(cx, cy + 120, '▶  CONTINUAR', {
             fontSize: '18px', fontFamily: "'Courier New', monospace", color: '#ffffff', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(204);
         this._missaoGrupo.push(btnText);
@@ -351,10 +408,6 @@ export default class Cena02 extends Phaser.Scene {
         this._ativarPortaSaida();
     }
 
-    // =======================================================
-    // MÉTODOS DE SAÍDA E TRANSIÇÃO
-    // =======================================================
-
     _ativarPortaSaida() {
         this._fase = 'saida';
 
@@ -367,19 +420,9 @@ export default class Cena02 extends Phaser.Scene {
             this._portaLabel.setColor('#fbbf24');
         }
 
-        if (this._instrBg && this._instrText) {
-            this._instrBg.setVisible(true);
-            this._instrText.setText('Dirija-se à porta de saída para ir ao Mapa');
-            this._instrText.setColor('#fbbf24');
-        }
-
         if (this._porta) {
             this._porta.setInteractive({ useHandCursor: true });
             this._porta.on('pointerdown', () => this._sairCasa());
-        }
-
-        if (this.player && this._portaZona) {
-            this.physics.add.overlap(this.player, this._portaZona, () => this._sairCasa());
         }
     }
 
