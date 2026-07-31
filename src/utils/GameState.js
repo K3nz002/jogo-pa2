@@ -8,9 +8,11 @@ export const GameState = {
     horaAtual: 8,
     acoesHoje: 0,
     maxAcoesPorDia: 5,
+    _fimDiaAgendado: false, // evita múltiplos fim-de-dia
 
     inventario: [],       // IDs de itens coletados
     pistasAnotadas: [],   // IDs de pistas anotadas no caderno
+    anotacoesInterrogatorios: [], // { npcId, npcNome, dia, pontoChave }
     interrogados: {},     // { npcId: [dia1, dia2, ...] }
     flags: {},            // flags de eventos genéricos
 
@@ -59,19 +61,52 @@ export const GameState = {
     },
 
     /**
+     * Registra uma anotação-chave de um interrogatório.
+     * @param {string} npcId
+     * @param {string} npcNome
+     * @param {number} dia
+     * @param {string} pontoChave - Resumo do ponto importante
+     */
+    registrarAnotacaoInterrogatorio(npcId, npcNome, dia, pontoChave) {
+        this.anotacoesInterrogatorios.push({ npcId, npcNome, dia, pontoChave });
+    },
+
+    /**
+     * Retorna todas as anotações de interrogatórios.
+     * @returns {Array}
+     */
+    getAnotacoesInterrogatorios() {
+        return this.anotacoesInterrogatorios;
+    },
+
+    /**
+     * Verifica se o jogador ainda pode realizar ações.
+     * Retorna false se ações esgotadas OU se já são 22h ou mais.
+     */
+    podeAgir() {
+        return this.acoesHoje < this.maxAcoesPorDia && this.horaAtual < 22;
+    },
+
+    /**
      * Gasta uma ação e avança o tempo.
-     * @returns {boolean} true se o dia deve encerrar
+     * @returns {boolean} true se o dia deve encerrar (primeira vez)
      */
     gastarAcao() {
         this.acoesHoje++;
         this.horaAtual += 2;
-        return this.horaAtual >= 22 || this.acoesHoje >= this.maxAcoesPorDia;
+        const deveFinalizar = this.horaAtual >= 22 || this.acoesHoje >= this.maxAcoesPorDia;
+        if (deveFinalizar && !this._fimDiaAgendado) {
+            this._fimDiaAgendado = true;
+            return true;
+        }
+        return false;
     },
 
     avancarDia() {
         this.diaAtual++;
         this.horaAtual = 8;
         this.acoesHoje = 0;
+        this._fimDiaAgendado = false;
     },
 
     //  Formatação
@@ -112,8 +147,10 @@ export const GameState = {
         this.diaAtual = 1;
         this.horaAtual = 8;
         this.acoesHoje = 0;
+        this._fimDiaAgendado = false;
         this.inventario = [];
         this.pistasAnotadas = [];
+        this.anotacoesInterrogatorios = [];
         this.interrogados = {};
         this.flags = {};
     }

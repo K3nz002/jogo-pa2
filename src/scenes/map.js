@@ -57,6 +57,11 @@ export class MapaScene extends Phaser.Scene {
         this.events.on('dialogoEncerrado', this._aoTerminarDialogo, this);
         this.events.on('puzzleResolvido',   this._aoPuzzleResolvido,  this);
 
+        // Ao retomar a cena (ex: fechar inventário/caderno), desbloquear interação
+        this.events.on('resume', () => {
+            this._interagindo = false;
+        });
+
         // Câmera segue o player
         this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
         this.cameras.main.setDeadzone(200, 100);
@@ -156,23 +161,43 @@ export class MapaScene extends Phaser.Scene {
         const npcsDef = [
             { id: 'ricardo', nome: 'Ricardo',  cor: 0xfbbf24, x: 490, y: 480, icon: '🧑‍🍳' },
             { id: 'elena',   nome: 'Elena',  cor: 0xd946ef, x: 890, y: 340, icon: '👩' },
-            { id: 'marco',   nome: 'Marco',  cor: 0xef4444, x: 1700, y: 370, icon: '🕴️' },
+            { id: 'marco',   nome: 'Marco',  cor: 0xef4444, x: 1700, y: 370, icon: null, sprite: 'npc-2' },
         ];
 
         this._npcs = [];
 
         npcsDef.forEach(def => {
-            // Corpo do NPC
-            const npc = this.add.rectangle(def.x, def.y, 30, 46, def.cor, 0.9).setDepth(9);
-            this.physics.add.existing(npc, true);
+            let npc;
+
+            if (def.sprite) {
+                // Usar sprite em vez de retângulo
+                npc = this.add.image(def.x, def.y, def.sprite).setDepth(9);
+                // Escala para manter proporção visual
+                const targetH = 120;
+                const scale = targetH / npc.height;
+                npc.setScale(scale);
+                this.physics.add.existing(npc, true);
+                npc.body.setSize(30, 46);
+                npc.body.setOffset(
+                    (npc.width - 30 / scale) / 2,
+                    (npc.height - 46 / scale) / 2
+                );
+            } else {
+                // Retângulo colorido (padrão)
+                npc = this.add.rectangle(def.x, def.y, 30, 46, def.cor, 0.9).setDepth(9);
+                this.physics.add.existing(npc, true);
+            }
+
             npc.setInteractive({ useHandCursor: true });
             npc.setData('tipo', 'npc');
             npc.setData('npcId', def.id);
             npc.setData('npcNome', def.nome);
 
-            // Ícone
-            this.add.text(def.x, def.y - 26, def.icon, { fontSize: '20px' })
-                .setOrigin(0.5).setDepth(10);
+            // Ícone (apenas se definido — sprites não precisam de emoji)
+            if (def.icon) {
+                this.add.text(def.x, def.y - 26, def.icon, { fontSize: '20px' })
+                    .setOrigin(0.5).setDepth(10);
+            }
 
             // Nome acima
             const nomeTag = this.add.text(def.x, def.y - 50, def.nome, {
@@ -187,20 +212,21 @@ export class MapaScene extends Phaser.Scene {
             this.tweens.add({ targets: q, y: q.y - 6, yoyo: true, repeat: -1, duration: 900, ease: 'Sine.easeInOut' });
 
             // Efeitos de hover
+            const baseScaleY = npc.scaleY; // guardar escala original
             npc.on('pointerover', () => {
-                this.tweens.add({ targets: npc, scaleY: 1.08, duration: 110 });
+                this.tweens.add({ targets: npc, scaleY: baseScaleY * 1.08, duration: 110 });
                 nomeTag.setAlpha(1);
                 this.input.setDefaultCursor('pointer');
             });
             npc.on('pointerout', () => {
-                this.tweens.add({ targets: npc, scaleY: 1, duration: 110 });
+                this.tweens.add({ targets: npc, scaleY: baseScaleY, duration: 110 });
                 nomeTag.setAlpha(0.75);
                 this.input.setDefaultCursor('default');
             });
 
             // Colisão com player
             this.physics.add.collider(this.player, npc);
-            this._npcs.push({ rect: npc, def });
+            this._npcs.push({ rect: npc, def, q });
         });
     }
 
@@ -321,11 +347,11 @@ export class MapaScene extends Phaser.Scene {
         this._hudAcoes = this._hudTxt(850, 34, '', depth, '#fbbf24');
 
         // Botões fixos
-        this._criarBotaoHUD(1620, 34, '[ I ]  INVENTÁRIO', depth, () => this._abrirInventario());
-        this._criarBotaoHUD(1820, 34, '[ N ]  CADERNO',   depth, () => this._abrirCaderno());
+        this._criarBotaoHUD(1820, 34, '[ I ] 🎒 INVENTÁRIO', depth, () => this._abrirInventario());
+        this._criarBotaoHUD(1620, 34, '[ N ] ✏️ CADERNO',   depth, () => this._abrirCaderno());
 
         // Botão julgamento (aparece no dia 3)
-        this._btnJulgamentoHUD = this._criarBotaoHUD(1430, 34, '[ J ]  JULGAMENTO ⚖️', depth, () => this._irJulgamento(), '#ef4444');
+        this._btnJulgamentoHUD = this._criarBotaoHUD(1430, 34, '[ J ] ⚖️ JULGAMENTO', depth, () => this._irJulgamento(), '#ef4444');
         this._btnJulgamentoHUD.setVisible(GameState.diaAtual >= GameState.maxDias);
 
         this._atualizarHUD();
@@ -351,7 +377,7 @@ export class MapaScene extends Phaser.Scene {
         this._hudDia.setText(`DIA ${GameState.diaAtual} / ${GameState.maxDias}`);
         this._hudHora.setText(`⏰  ${GameState.getHoraFormatada()}`);
         const ac = GameState.getAcoesRestantes();
-        this._hudAcoes.setText(`⚡  ${ac} AÇÃO${ac !== 1 ? 'ÕES' : ''} RESTANTE${ac !== 1 ? 'S' : ''}`);
+        this._hudAcoes.setText(`⚡  ${ac} ${ac !== 1 ? 'AÇÕES' : 'AÇÃO'} RESTANTE${ac !== 1 ? 'S' : ''}`);
         if (this._btnJulgamentoHUD) {
             this._btnJulgamentoHUD.setVisible(GameState.diaAtual >= GameState.maxDias);
         }
@@ -394,6 +420,11 @@ export class MapaScene extends Phaser.Scene {
         });
 
         this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE).on('down', () => {
+            if (this._interagindo) return;
+            if (!GameState.podeAgir()) {
+                this.mostrarMensagem('Você não pode mais agir hoje. Aguarde o fim do dia.', 2500);
+                return;
+            }
               // Procura o NPC mais próximo dentro do alcance
             let alvoNPC = null;
             let menorDistNPC = this.alcanceInteracao;
@@ -432,8 +463,15 @@ export class MapaScene extends Phaser.Scene {
             const tipo = obj.getData('tipo');
             const objDef = obj.getData('objDef');
 
-            if (tipo === 'npc')   this._interagirNPC(obj);
-            else if (objDef)      this._interagirObjeto(obj, objDef);
+            if (tipo === 'npc')   
+                this._interagirNPC(obj);
+            else if (objDef) {
+                if (!GameState.podeAgir()) {
+                    this.mostrarMensagem('Você não pode mais agir hoje. Aguarde o fim do dia.', 2500);
+                    return;
+                }
+                this._interagirObjeto(obj, objDef);
+            }
         });
     }
 
@@ -470,6 +508,10 @@ export class MapaScene extends Phaser.Scene {
             this.mostrarMensagem(`Muito longe. Aproxime-se de ${npcNome} para conversar.`, 2500);
             return;
         }
+        if (!GameState.podeAgir()) {
+            this.mostrarMensagem('Você não pode mais agir hoje. Aguarde o fim do dia.', 2500);
+            return;
+        }
         if (GameState.jaDinterrogadoHoje(npcId)) {
             this.mostrarMensagem(`${npcNome} já foi interrogado hoje. Volte amanhã.`, 2500);
             return;
@@ -496,6 +538,10 @@ export class MapaScene extends Phaser.Scene {
         }
         if (def.diaMin > GameState.diaAtual) {
             this.mostrarMensagem('Nada de interessante aqui por enquanto.', 2000);
+            return;
+        }
+        if (!GameState.podeAgir()) {
+            this.mostrarMensagem('Você não pode mais agir hoje. Aguarde o fim do dia.', 2500);
             return;
         }
 
@@ -571,6 +617,19 @@ export class MapaScene extends Phaser.Scene {
         this._interagindo = false;
         GameState.registrarInterrogatorio(npcId);
         const nomeNPC = this.dialogoMgr.getNomeNPC(npcId);
+
+        // Esconder o ponto de interrogação do NPC
+        const npcEntry = this._npcs.find(n => n.def.id === npcId);
+        if (npcEntry && npcEntry.q) {
+            npcEntry.q.setVisible(false);
+        }
+
+        // Registrar ponto-chave do interrogatório no caderno
+        const pontoChave = this.dialogoMgr.getPontoChave(npcId, GameState.diaAtual);
+        if (pontoChave) {
+            GameState.registrarAnotacaoInterrogatorio(npcId, nomeNPC, GameState.diaAtual, pontoChave);
+        }
+
         const fimDia = GameState.gastarAcao();
         this._atualizarHUD();
         this.mostrarMensagem(`Interrogatório de ${nomeNPC} concluído.\nInformações anotadas no caderno.`, 3500);
@@ -608,6 +667,14 @@ export class MapaScene extends Phaser.Scene {
         if (this._btnJulgamentoHUD) {
             this._btnJulgamentoHUD.setVisible(GameState.diaAtual >= GameState.maxDias);
         }
+
+        // Atualizar pontos de interrogação dos NPCs
+        this._npcs.forEach(n => {
+            if (n.q) {
+                const jaInterrogado = GameState.jaDinterrogadoHoje(n.def.id);
+                n.q.setVisible(!jaInterrogado);
+            }
+        });
 
         // Fade in
         this.cameras.main.fadeIn(900, 0, 0, 0);

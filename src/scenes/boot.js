@@ -52,6 +52,9 @@ export class BootScene extends Phaser.Scene {
         this.load.json('dialogos', 'assets/dialogos.json');
         this.load.json('pistas',   'assets/pistas.json');
 
+        // Sprites de NPCs
+        this.load.image('npc-2', 'assets/sprites/NPC-2.png');
+
         // Áudio (adicionar arquivos .mp3/.wav em assets/audio/ quando disponíveis)
         // this.load.audio('musica_menu',     'assets/audio/menu.mp3');
         // this.load.audio('musica_suspense', 'assets/audio/suspense.mp3');

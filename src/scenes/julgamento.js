@@ -53,38 +53,112 @@ export class JulgamentoScene extends Phaser.Scene {
 
     _criarPainelPistas(pistasData, width, height) {
         const lx = 370, lw = 680;
-        this.add.text(lx, 160, '📓  PISTAS COLETADAS:', {
+        const panelTopY = 145;
+        const panelH = height - 245; // espaço entre cabeçalho e botão arquivar
+
+        this.add.text(lx, panelTopY, '📓  PISTAS E DEPOIMENTOS:', {
             fontSize: '17px', fontFamily: "'Courier New', monospace",
             color: '#fbbf24', fontStyle: 'bold'
         }).setOrigin(0.5);
 
         const pistas = GameState.pistasAnotadas;
-        if (pistas.length === 0) {
-            this.add.text(lx, 240, 'Nenhuma pista coletada!', {
+        const anotacoes = GameState.getAnotacoesInterrogatorios();
+
+        if (pistas.length === 0 && anotacoes.length === 0) {
+            this.add.text(lx, panelTopY + 80, 'Nenhuma pista coletada!', {
                 fontSize: '16px', fontFamily: "'Courier New', monospace", color: '#ef4444'
             }).setOrigin(0.5);
-            this.add.text(lx, 280, 'Você não investigou nada.\nDificilmente conseguirá uma condenação.', {
+            this.add.text(lx, panelTopY + 120, 'Você não investigou nada.\nDificilmente conseguirá uma condenação.', {
                 fontSize: '14px', fontFamily: "'Courier New', monospace",
                 color: '#475569', align: 'center', lineSpacing: 6
             }).setOrigin(0.5);
             return;
         }
 
-        let py = 185;
+        // Área scrollável
+        const scrollTopY = panelTopY + 25;
+        const scrollH = panelH - 30;
+        const container = this.add.container(0, 0);
+
+        let py = scrollTopY + 10;
+
+        // Pistas coletadas
         pistas.forEach((pistaId) => {
             const pista = pistasData?.pistas?.[pistaId];
             if (!pista) return;
             const bg = this.add.rectangle(lx, py + 32, lw - 10, 60, 0x1e293b);
             bg.setStrokeStyle(1, 0x334155);
-            this.add.text(lx - lw / 2 + 20, py + 10, `🔍  ${pista.titulo}`, {
+            container.add(bg);
+            const t1 = this.add.text(lx - lw / 2 + 20, py + 10, `🔍  ${pista.titulo}`, {
                 fontSize: '14px', fontFamily: "'Courier New', monospace", color: '#fbbf24', fontStyle: 'bold'
             }).setOrigin(0);
-            this.add.text(lx - lw / 2 + 20, py + 32, pista.descricao, {
+            container.add(t1);
+            const t2 = this.add.text(lx - lw / 2 + 20, py + 32, pista.descricao, {
                 fontSize: '12px', fontFamily: "'Courier New', monospace",
                 color: '#94a3b8', wordWrap: { width: lw - 50 }
             }).setOrigin(0);
+            container.add(t2);
             py += 72;
         });
+
+        // Anotações de interrogatórios
+        if (anotacoes.length > 0) {
+            py += 8;
+            const secTitle = this.add.text(lx, py + 10, '🗣️  DEPOIMENTOS:', {
+                fontSize: '15px', fontFamily: "'Courier New', monospace",
+                color: '#6366f1', fontStyle: 'bold'
+            }).setOrigin(0.5);
+            container.add(secTitle);
+            py += 30;
+
+            anotacoes.forEach((nota) => {
+                const bg = this.add.rectangle(lx, py + 25, lw - 10, 50, 0x111d36);
+                bg.setStrokeStyle(1, 0x1e3a5f);
+                container.add(bg);
+                const t1 = this.add.text(lx - lw / 2 + 20, py + 8, `${nota.npcNome} (Dia ${nota.dia}):`, {
+                    fontSize: '12px', fontFamily: "'Courier New', monospace",
+                    color: '#818cf8', fontStyle: 'bold'
+                }).setOrigin(0);
+                container.add(t1);
+                const t2 = this.add.text(lx - lw / 2 + 20, py + 26, nota.pontoChave, {
+                    fontSize: '11px', fontFamily: "'Courier New', monospace",
+                    color: '#94a3b8', fontStyle: 'italic',
+                    wordWrap: { width: lw - 50 }
+                }).setOrigin(0);
+                container.add(t2);
+                py += 58;
+            });
+        }
+
+        const totalContentH = py - scrollTopY;
+
+        // Máscara para recortar conteúdo
+        const maskShape = this.make.graphics({ x: 0, y: 0, add: false });
+        maskShape.fillStyle(0xffffff);
+        maskShape.fillRect(lx - lw / 2, scrollTopY, lw, scrollH);
+        container.setMask(maskShape.createGeometryMask());
+
+        // Scroll por roda do mouse
+        const maxScroll = Math.max(0, totalContentH - scrollH + 20);
+        let scrollOffset = 0;
+
+        if (maxScroll > 0) {
+            this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
+                scrollOffset = Phaser.Math.Clamp(scrollOffset + deltaY * 0.5, 0, maxScroll);
+                container.y = -scrollOffset;
+            });
+
+            // Scrollbar visual
+            const barH = Math.max(30, (scrollH / (scrollH + maxScroll)) * scrollH);
+            const barX = lx + lw / 2 - 8;
+            this.add.rectangle(barX, scrollTopY + scrollH / 2, 4, scrollH, 0x1e293b, 0.5);
+            const barThumb = this.add.rectangle(barX, scrollTopY + barH / 2, 4, barH, 0x6366f1, 0.6);
+
+            this.input.on('wheel', () => {
+                const ratio = scrollOffset / maxScroll;
+                barThumb.y = scrollTopY + barH / 2 + ratio * (scrollH - barH);
+            });
+        }
     }
 
     _criarPainelSuspeitos(width, height) {
@@ -177,7 +251,7 @@ export class JulgamentoScene extends Phaser.Scene {
                 emoji: '🏆', titulo: '✓  CASO RESOLVIDO',
                 subtitulo: 'Marco Ferreira foi preso e indiciado!',
                 texto:
-                    'Parabéns, Detetive.\n\n' +
+                    '\n\n\nParabéns, Detetive.\n\n' +
                     'Com as provas reunidas, Marco Ferreira foi indiciado pelo\n' +
                     'desaparecimento de Ana.\n\n' +
                     'O motivo: uma dívida impagável de R$ 2,3 milhões.\n' +
@@ -189,7 +263,7 @@ export class JulgamentoScene extends Phaser.Scene {
                 emoji: '⚠️', titulo: '⚠  SUSPEITO CERTO, PROVAS INSUFICIENTES',
                 subtitulo: 'Você apontou para o culpado — mas sem evidências suficientes.',
                 texto:
-                    'Você desconfiou de Marco — e estava certo.\n' +
+                    '\n\nVocê desconfiou de Marco — e estava certo.\n' +
                     'Mas sem provas sólidas, o promotor não conseguiu uma condenação.\n\n' +
                     'Marco foi solto por falta de evidências.\n' +
                     'O caso permanece aberto, e o criminoso continua livre.\n\n' +
@@ -200,7 +274,7 @@ export class JulgamentoScene extends Phaser.Scene {
                 emoji: '❌', titulo: '✗  ACUSAÇÃO ERRADA',
                 subtitulo: `Um inocente foi acusado: ${suspeito?.nome || '?'}.`,
                 texto:
-                    `Você acusou ${suspeito?.nome || 'um inocente'}, mas errou o alvo.\n\n` +
+                    `\n\n\nVocê acusou ${suspeito?.nome || 'um inocente'}, mas errou o alvo.\n\n` +
                     'Enquanto o processo judicial se arrastava, Marco Ferreira\n' +
                     'destruiu as evidências restantes e fugiu do país.\n\n' +
                     'O verdadeiro culpado do desaparecimento de Ana nunca foi punido.\n' +
@@ -211,7 +285,7 @@ export class JulgamentoScene extends Phaser.Scene {
                 emoji: '📁', titulo: '📁  CASO ARQUIVADO',
                 subtitulo: 'A investigação não chegou a uma conclusão.',
                 texto:
-                    'Você não conseguiu reunir provas suficientes para acusar ninguém.\n\n' +
+                    '\n\n\nVocê não conseguiu reunir provas suficientes para acusar ninguém.\n\n' +
                     'O caso de desaparecimento de Ana foi arquivado.\n' +
                     'Marco, o verdadeiro culpado, continuou sua vida normalmente.\n\n' +
                     'A justiça nem sempre prevalece.'

@@ -115,7 +115,9 @@ export class MenuScene extends Phaser.Scene {
         btnBg.on('pointerdown', () => {
             this.cameras.main.fadeOut(600, 0, 0, 0);
             this.cameras.main.once('camerafadeoutcomplete', () => {
-                this.scene.start('MapaScene');
+                // Se o tutorial já foi concluído, ir direto para o mapa
+                const destino = GameState.flags.tutorial_completo ? 'MapaScene' : 'TutorialScene';
+                this.scene.start(destino);
             });
         });
 

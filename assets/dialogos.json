@@ -21,6 +21,11 @@
           "Elena: Sei que parece suspeito, mas eu jamais faria isso. Carlos era tudo para mim.",
           "Elena: Confio na sua investigação. Faça justiça."
         ]
+      },
+      "pontosChave": {
+        "1": "Elena confirma que Carlos foi envenenado. Tinha inimigos nos negócios.",
+        "2": "Elena viu Marco Ferreira saindo pela porta dos fundos no dia do crime (~20h). Desentendimentos sobre dinheiro.",
+        "3": "Elena revela seguro de vida em seu nome, mas nega envolvimento."
       }
     },
     "marco": {
@@ -44,6 +49,11 @@
           "Marco: Juro! Fui tentar resolver nossa situação financeira e o encontrei no chão do escritório. Entrei em pânico e fugi.",
           "Marco: Eu não o matei. Você precisa acreditar em mim!"
         ]
+      },
+      "pontosChave": {
+        "1": "Marco alega álibi com jantar de negócios. Nega conhecimento sobre pistas.",
+        "2": "Marco nega a dívida e ameaça com advogados. Comportamento defensivo e agressivo.",
+        "3": "Marco admite ter estado na mansão, mas diz que Carlos já estava morto quando chegou. Visivelmente nervoso."
       }
     },
     "ricardo": {
@@ -66,6 +76,11 @@
           "Ricardo: Ele mexeu nas garrafas. Na hora achei que era só um convidado bebendo. Mas agora entendo o que foi.",
           "Ricardo: Fiquei com medo de falar antes. Mas não posso deixar o Sr. Carlos sem justiça."
         ]
+      },
+      "pontosChave": {
+        "1": "Carlos estava perturbado nas últimas semanas. Recebia ligações ameaçadoras à noite.",
+        "2": "Ricardo ouviu discussão acalorada no escritório antes do jantar. Um carro saiu pela garagem de serviço.",
+        "3": "Ricardo viu Marco Ferreira mexendo nas garrafas no bar do jardim antes do jantar. Testemunho direto."
       }
     }
   }
