@@ -15,11 +15,7 @@ export default class Cena02 extends Phaser.Scene {
 
     create() {
         const { width, height } = this.scale;
-
-        // O restante da sua função create continua aqui...
-    }
-}
-
+    
         // Estado inicial da cena
         this._fase = 'dialogo';
         this._dialogoIndex = 0;
